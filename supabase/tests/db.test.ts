@@ -92,12 +92,21 @@ describe("RLS coverage (SEC-01)", () => {
     await db.exec(`begin; drop policy programmes_delete on public.programmes`);
     try {
       expect((await db.query<{ problem: string }>(sql)).rows).toEqual([
-        { problem_table: "programmes", problem: "missing DELETE policy" },
+        { problem_object: "programmes", problem: "missing DELETE policy" },
       ]);
     } finally {
       await db.exec(`rollback`);
     }
     expect((await db.query(sql)).rows).toEqual([]);
+  });
+
+  it("hosted_authz_check.sql runs clean here, reports only PASS, and leaves no data behind", async () => {
+    const before = [await count("programmes"), await count("profiles")];
+    const results = await db.exec(readFileSync(join(dir, "tests/hosted_authz_check.sql"), "utf8"));
+    const lines = (results[results.length - 1].rows as Record<string, string>[]).map((r) => Object.values(r)[0]);
+    expect(lines.filter((l) => !l.startsWith("PASS"))).toEqual([]);
+    expect(lines.length).toBeGreaterThanOrEqual(16);
+    expect([await count("programmes"), await count("profiles")]).toEqual(before);
   });
 
   it("trigger functions are not executable by API roles", async () => {

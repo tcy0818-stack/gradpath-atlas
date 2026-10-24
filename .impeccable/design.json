@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-25T00:00:00.000Z",
+  "title": "Design System: GradPath Atlas",
+  "extensions": {
+    "colorMeta": {
+      "teal": { "role": "primary", "displayName": "Working Teal", "canonical": "#0f766e", "tonalRamp": ["#042f2c", "#0a4a45", "#115e59", "#0f766e", "#2a9488", "#5eead4", "#b7e0d9", "#e6f4f1"] },
+      "ground": { "role": "neutral", "displayName": "Pale Ground", "canonical": "#f8fafc", "tonalRamp": ["#0f2a43", "#334155", "#475569", "#64748b", "#a9b8c9", "#d5dde6", "#eef4fa", "#f8fafc"] },
+      "rail": { "role": "neutral", "displayName": "Navy Rail", "canonical": "#0f2a43", "tonalRamp": ["#0f2a43", "#17375a", "#1f4570", "#2a4560", "#5a7390", "#a9b8c9", "#e2e8f0", "#f8fafc"] },
+      "danger": { "role": "status", "displayName": "Danger", "canonical": "#b42318", "tonalRamp": ["#55160c", "#7a271a", "#b42318", "#d92d20", "#f97066", "#fda29b", "#fee4e2", "#fef3f2"] },
+      "ok": { "role": "status", "displayName": "Ok", "canonical": "#166534", "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#4ade80", "#86efac", "#d1fadf", "#ecfdf3"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Auth brand-panel promise only." },
+      "headline": { "displayName": "Headline", "purpose": "Page h1." },
+      "title": { "displayName": "Title", "purpose": "Section and panel h2." },
+      "body": { "displayName": "Body", "purpose": "Paragraphs and inputs; tabular numerals." },
+      "label": { "displayName": "Label", "purpose": "Field labels, quiet buttons, hints." }
+    },
+    "shadows": [
+      { "name": "menu-popover", "value": "0 10px 15px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.25)", "purpose": "Mobile menu popover only (Tailwind shadow-lg tinted black/25). Everything else is flat." }
+    ],
+    "motion": [
+      { "name": "color-transition", "value": "colors, Tailwind default duration and easing", "purpose": "Hover color change on buttons." },
+      { "name": "reduced-motion", "value": "0.01ms durations under prefers-reduced-motion", "purpose": "Global override." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Full-width teal submit under the last field.",
+      "html": "<button class=\"ds-btn-primary\">Sign in</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:44px;padding:10px 16px;border:0;border-radius:8px;background:#0f766e;color:#fff;font:600 1rem system-ui,sans-serif;transition:background-color .15s}.ds-btn-primary:hover{background:#115e59}.ds-btn-primary:focus-visible{outline:2px solid #0f766e;outline-offset:2px}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary action such as Sign out.",
+      "html": "<button class=\"ds-btn-quiet\">Sign out</button>",
+      "css": ".ds-btn-quiet{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 14px;border:1px solid #64748b;border-radius:8px;background:#fff;color:#0f2a43;font:600 .875rem system-ui,sans-serif;transition:background-color .15s}.ds-btn-quiet:hover{background:#e6f4f1}.ds-btn-quiet:focus-visible{outline:2px solid #0f766e;outline-offset:2px}"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Labelled 44px input with hint.",
+      "html": "<div class=\"ds-field\"><label for=\"e\">Email</label><input id=\"e\" type=\"email\" value=\"\"></div>",
+      "css": ".ds-field label{display:block;font:600 .875rem system-ui,sans-serif;color:#0f2a43}.ds-field input{display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #64748b;border-radius:8px;background:#fff;color:#0f2a43;font:1rem system-ui,sans-serif}.ds-field input:focus-visible{outline:2px solid #0f766e;outline-offset:2px}"
+    },
+    {
+      "name": "Error Alert",
+      "kind": "custom",
+      "refersTo": "field",
+      "description": "Status message: icon plus text on a tint.",
+      "html": "<div class=\"ds-alert\" role=\"alert\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"6.25\"/><path d=\"M8 4.8v3.6M8 10.9v.1\"/></svg><div>Check your email and password.</div></div>",
+      "css": ".ds-alert{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid #b42318;border-radius:8px;background:#fef3f2;color:#b42318;font:.875rem system-ui,sans-serif}.ds-alert svg{margin-top:2px;flex-shrink:0}"
+    },
+    {
+      "name": "Rail Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Navy rail: current page, link, and unavailable item with Soon pill.",
+      "html": "<nav class=\"ds-rail\"><a class=\"ds-nav ds-current\" aria-current=\"page\" href=\"#\">Dashboard</a><span class=\"ds-nav ds-soon\"><span>Programmes</span><span class=\"ds-pill\">Soon</span></span></nav>",
+      "css": ".ds-rail{width:240px;padding:16px 12px;background:#0f2a43;font-family:system-ui,sans-serif}.ds-nav{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:0 12px;border-radius:8px;font-size:.9375rem;color:#e2e8f0;font-weight:500;text-decoration:none}a.ds-nav:hover{background:#17375a}.ds-current{background:#1f4570;font-weight:600}.ds-soon{color:#a9b8c9}.ds-pill{border:1px solid #2a4560;border-radius:9999px;padding:2px 8px;font-size:.75rem}.ds-nav:focus-visible{outline:2px solid #5eead4;outline-offset:2px}"
+    },
+    {
+      "name": "Empty-State Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "White hairline panel stating nothing is tracked yet.",
+      "html": "<section class=\"ds-panel\"><h2>Nothing is tracked yet</h2><p>No figures are shown because nothing has been recorded.</p></section>",
+      "css": ".ds-panel{padding:24px;border:1px solid #d5dde6;border-radius:8px;background:#fff;color:#0f2a43;font-family:system-ui,sans-serif}.ds-panel h2{margin:0;font-size:1.125rem;font-weight:600}.ds-panel p{margin:8px 0 0;max-width:65ch;color:#334155}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Working Planner",
+    "overview": "A calm, private academic planner. The look is pinned by PRD section 3.2 (standard app shell, rail plus top bar), not rolled: a navy rail, a pale ground, white surfaces, one teal accent. Density is moderate and plain; empty states say so honestly, and unbuilt areas are shown as unavailable rather than faked.",
+    "keyCharacteristics": [
+      "Navy rail (#0f2a43) is the only dark surface; everything else is pale ground and white.",
+      "Teal is used for primary actions, links, and the focus ring only.",
+      "System font stack, tabular numerals on body.",
+      "8px radius throughout; 1px hairlines instead of shadows.",
+      "Status is always icon plus text. 44px minimum targets."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Teal is the only accent. Status colors appear only inside Alert and field errors, never as decoration.", "section": "colors" },
+      { "name": "The Icon-Plus-Text Rule", "body": "Status is never colour alone: every Alert and field error carries a 16px stroke icon and a sentence.", "section": "colors" },
+      { "name": "The Tabular Rule", "body": "Numerals are tabular on body so dates and counts align as they arrive.", "section": "typography" }
+    ],
+    "dos": [
+      "Do keep teal as the sole accent and the navy rail as the only dark surface.",
+      "Do mark every current page with the Rail Active fill plus semibold, and every unbuilt area as a non-link with \"Soon\".",
+      "Do pair every status color with an icon and text.",
+      "Do keep targets at 44px minimum and the 2px teal focus ring on everything focusable.",
+      "Do state empty states plainly; show no figures that were not recorded."
+    ],
+    "donts": [
+      "Don't use side-stripe borders for current or status state.",
+      "Don't link to routes that do not exist yet.",
+      "Don't add shadows for hierarchy; use tone and hairlines.",
+      "Don't introduce a second accent hue or a display typeface."
+    ]
+  }
+}

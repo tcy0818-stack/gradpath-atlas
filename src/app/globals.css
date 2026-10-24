@@ -1,19 +1,106 @@
 @import "tailwindcss";
 
-/* Light, neutral base. Full design tokens are defined in Phase 7 (M6.01). */
+/* Design tokens (PRD 3.2): pale ground, navy ink, a navy rail, one teal accent.
+   Contrast measured against their backgrounds: ink on bg 14:1, ink-2 9.9:1, muted 7.2:1, accent on white 5.5:1,
+   danger on white 6.5:1, ok on white 7.1:1, rail-ink on rail 12:1, rail-muted on rail 7.1:1, rail-ink on rail-active 8.4:1. */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f2a43;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --ink: #0f2a43;
+  --ink-2: #334155;
+  --muted: #475569;
+  --line: #d5dde6;
+  --control: #64748b;
+  --accent: #0f766e;
+  --accent-strong: #115e59;
+  --accent-tint: #e6f4f1;
+  --rail: #0f2a43;
+  --rail-ink: #e2e8f0;
+  --rail-muted: #a9b8c9;
+  --rail-line: #2a4560;
+  --rail-hover: #17375a;
+  --rail-active: #1f4570;
+  --danger: #b42318;
+  --danger-tint: #fef3f2;
+  --ok: #166534;
+  --ok-tint: #ecfdf3;
+  --info-tint: #eef4fa;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-control: var(--control);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-tint: var(--accent-tint);
+  --color-rail: var(--rail);
+  --color-rail-ink: var(--rail-ink);
+  --color-rail-muted: var(--rail-muted);
+  --color-rail-line: var(--rail-line);
+  --color-rail-hover: var(--rail-hover);
+  --color-rail-active: var(--rail-active);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --color-ok: var(--ok);
+  --color-ok-tint: var(--ok-tint);
+  --color-info-tint: var(--info-tint);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  font-variant-numeric: tabular-nums; /* aligned digits in dates and counts as they arrive */
+}
+
+/* Browser surfaces themed from the palette. */
+::selection {
+  background: #b7e0d9;
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.on-dark :focus-visible {
+  outline-color: #5eead4;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  -webkit-text-fill-color: var(--ink);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

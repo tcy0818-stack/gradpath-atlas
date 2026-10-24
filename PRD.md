@@ -461,6 +461,7 @@ Bias and ethics notes [Dec]: record sampling (friends and classmates bias result
 * Calm academic look [Dec]: light neutral background, navy/slate text, **one** teal accent, system font stack (no third-party font requests), generous spacing, no gradients, stock photos or decorative charts.
 * Status is never colour-only: every badge pairs colour with a text label and icon (not started / draft / ready / expired / overdue / due today / blocked / submitted).
 * Tokens are defined once (CSS variables/Tailwind theme) and checked for ≥4.5:1 contrast in Phase 7; a 2px solid focus ring is the default (Brief p.34).
+* *Phase 2 refinements (built):* the rail uses a lighter navy fill plus semibold for the current page (no side stripe); areas not built yet appear as non-link items marked "Soon" with an sr-only "not available yet"; standalone text links have 44px targets; auth pages show a navy brand panel from 1024px and a one-line prototype note below it. Details live in `DESIGN.md`.
 * Desktop-first (Brief p.29); components stack gracefully at 768 and 375px. The primary action stays near the top on mobile; touch targets ≥44×44px on touch viewports (L3 p.39) — above WCAG 2.2's 24px minimum (SC 2.5.8).
 
 ### 3.3 Page specifications

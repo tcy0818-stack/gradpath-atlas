@@ -34,3 +34,9 @@ npm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+
+# Impeccable design-tool scratch output (surface briefs and design.json stay trackable)
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/build/
+.impeccable/hook.cache.json

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GradPath Atlas",
+  title: { default: "GradPath Atlas", template: "%s · GradPath Atlas" },
   description:
     "Compare your master's applications and see what to do next in one workspace.",
 };
