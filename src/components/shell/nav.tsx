@@ -10,8 +10,8 @@ const ITEMS = [
   { label: "Programmes", href: "/programmes" },
   { label: "Compare", href: "/compare" },
   { label: "Documents", href: "/documents" },
-  { label: "Tasks", href: null },
-  { label: "Deadlines", href: null },
+  { label: "Tasks", href: "/tasks" },
+  { label: "Deadlines", href: "/deadlines" },
   { label: "Adviser preview", href: null },
   { label: "Settings", href: null },
 ] as const;

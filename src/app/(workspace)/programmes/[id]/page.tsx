@@ -5,9 +5,12 @@ import { ProgrammeForm } from "@/components/programmes/programme-form";
 import { ReadinessPanel } from "@/components/programmes/readiness-panel";
 import { RequirementsEditor } from "@/components/programmes/requirements-editor";
 import { ExampleBadge, StatusBadge } from "@/components/programmes/status-badge";
-import { Alert, quietButton, textLink } from "@/components/ui";
+import { DueLabel } from "@/components/planning/due-label";
+import { Alert, quietButton, standaloneLink, textLink } from "@/components/ui";
 import { getProfile } from "@/lib/auth/dal";
 import { formatIsoDate } from "@/lib/dates";
+import { DEADLINE_TYPE_LABELS, decorateDeadlines } from "@/lib/deadlines";
+import { getDeadlinesForProgramme } from "@/lib/planning/queries";
 import { listDocumentFacts } from "@/lib/documents/queries";
 import { setShortlistAction, updateProgrammeAction } from "@/lib/programmes/actions";
 import { getProgrammeDetail } from "@/lib/programmes/queries";
@@ -23,7 +26,8 @@ const NOTICES: Record<string, string> = {
 export default async function ProgrammePage({ params, searchParams }: PageProps<"/programmes/[id]">) {
   const { id } = await params;
   const sp = await searchParams;
-  const [{ programme: p, requirements, deadline, history, impact, readiness, today }, profile, documents] = await Promise.all([getProgrammeDetail(id), getProfile(), listDocumentFacts()]);
+  const [{ programme: p, requirements, deadline, history, impact, readiness, today }, profile, documents, deadlineRows] = await Promise.all([getProgrammeDetail(id), getProfile(), listDocumentFacts(), getDeadlinesForProgramme(id)]);
+  const deadlines = decorateDeadlines(deadlineRows, [{ id: p.id, programme_name: p.programme_name, university_name: p.university_name, status: p.status }], today).sort((a, b) => a.due_date.localeCompare(b.due_date));
   const notice = NOTICES[(Array.isArray(sp.notice) ? sp.notice[0] : sp.notice) ?? ""];
   const when = (iso: string) => new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: profile.timeZone }).format(new Date(iso));
 
@@ -83,6 +87,27 @@ export default async function ProgrammePage({ params, searchParams }: PageProps<
         <section aria-labelledby="ready-h">
           <h2 id="ready-h" className="mb-3 text-lg font-semibold">Readiness</h2>
           <ReadinessPanel readiness={readiness} documents={documents} today={today} />
+        </section>
+
+        <section aria-labelledby="dl-h">
+          <h2 id="dl-h" className="mb-3 text-lg font-semibold">Deadlines</h2>
+          {deadlines.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-control p-4 text-ink-2">No deadlines yet. Set the application deadline under Details, or add a preparation milestone.</p>
+          ) : (
+            <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+              {deadlines.map((d) => (
+                <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-1">
+                  <Link href={`/deadlines/${d.id}`} className={standaloneLink}>{d.title} <span className="ml-1 font-normal text-ink-2">({DEADLINE_TYPE_LABELS[d.deadline_type]})</span></Link>
+                  <span className="text-sm"><DueLabel date={d.due_date} due={d.due} muted={!d.outstanding} />{d.closedReason && <span className="ml-2 text-ink-2">{d.closedReason}</span>}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 flex flex-wrap gap-x-6 text-sm">
+            <Link href={`/deadlines/new?programme=${p.id}`} className={standaloneLink}>Add a milestone</Link>
+            <Link href={`/tasks?programme=${p.id}`} className={standaloneLink}>Tasks for this programme</Link>
+            <Link href={`/tasks/new?programme=${p.id}`} className={standaloneLink}>Add a task</Link>
+          </p>
         </section>
 
         <section aria-labelledby="notes-h">

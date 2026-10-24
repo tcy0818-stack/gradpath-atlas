@@ -709,7 +709,7 @@ create policy <t>_delete on public.<t> for delete to authenticated using (owner_
 
 ### 5.5 Calculated-field definitions (implemented once in `src/lib/`)
 
-**Calendar dates and "today".** Deadlines and due dates are `date`. In TypeScript they remain `YYYY-MM-DD` strings. "Today" is the calendar date in the user's `profiles.time_zone`, computed once per request and passed down. Date differences convert `Y-M-D` to a day number arithmetically (no local-time parsing), so a date never shifts across a UTC boundary.
+**Calendar dates and "today".** *(Implemented in `src/lib/dates.ts`; the due-soon window is `DUE_SOON_DAYS` = 14, shown to the user on the Deadlines page.)* Deadlines and due dates are `date`. In TypeScript they remain `YYYY-MM-DD` strings. "Today" is the calendar date in the user's `profiles.time_zone`, computed once per request and passed down. Date differences convert `Y-M-D` to a day number arithmetically (no local-time parsing), so a date never shifts across a UTC boundary.
 
 **Deadline classification.** Outstanding = not done, and (if tied to a programme) the programme status is `researching` or `preparing`. Then: `due < today` → *Overdue*; `due = today` → *Due today* (shown in the *Due soon* group); `today < due ≤ today + 14` → *Due soon*; otherwise → *Later*. (The 14-day window is an assumption [Asm].)
 
@@ -865,7 +865,7 @@ This PRD is a specification. No requirement has been verified. Personas, prices,
 | Personal dashboard (p.28–29) | DSH-01…04 | `/dashboard`, `src/lib/dashboard.ts`, `next-actions.ts` | M5.23, M5.24 | Pending (Phase 6) |
 | Programme comparison table (p.28–29) | CMP-01…05, PRG-03 | `/programmes`, `/compare`, `src/lib/compare.ts` | M5.02, M5.08 | Pending (Phase 3) |
 | Programme CRUD, detail, notes, status (p.28–29) | PRG-01…07, REQ-01/02 | `/programmes/[id]`, server actions | M5.01, M5.03–M5.07 | Pending (Phase 3) |
-| Deadline tracker (p.28–29) | DL-01…05 | `/deadlines`, `src/lib/dates.ts` | M5.16–M5.18 | Pending (Phase 5) |
+| Deadline tracker (p.28–29) | DL-01…05 | `/deadlines`, `src/lib/dates.ts`, `src/lib/deadlines.ts` | M5.16–M5.18 | Built in Phase 5; date and grouping logic unit-tested; browser checks pending |
 | Document tracker, reusable links (p.28–29, p.11) | DOC-01…05, RDY-01/02 | `/documents`, `src/lib/readiness.ts` | M5.11–M5.15 | Built in Phase 4; unit-tested; browser checks pending (M5.12–M5.15) |
 | Task list, prerequisites, progress (p.28, p.11) | TSK-01…05 | `/tasks`, `src/lib/tasks.ts` | M5.19, M5.20, M5.22 | Pending (Phase 5) |
 | Search, filters, sorting (p.28) | CMP-03, TSK-02, DL-02 | list pages | M5.02, M5.20, M5.17 | Pending (Phases 3, 5) |

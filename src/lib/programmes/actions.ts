@@ -15,6 +15,8 @@ import { idSchema, notesSchema, parseForm, programmeSchema, requirementSchema, s
 const refresh = (id?: string) => {
   revalidatePath("/programmes");
   revalidatePath("/compare");
+  revalidatePath("/tasks");
+  revalidatePath("/deadlines");
   if (id) revalidatePath(`/programmes/${id}`);
 };
 
@@ -142,13 +144,16 @@ export async function deleteRequirementAction(fd: FormData): Promise<void> {
   refresh(del.data?.[0]?.programme_id as string | undefined);
 }
 
-/** Loads the fictional examples through the existing per-user seed function (idempotent; Phase 1 migration 0009). */
+/** Loads the fictional examples through the per-user seed functions (idempotent; migrations 0009 and 0010). */
 export async function loadExamplesAction(): Promise<void> {
   const profile = await getProfile();
   const supabase = await ctx();
-  const { error } = await supabase.rpc("seed_demo_data", { p_seed_date: todayInZone(profile.timeZone) });
+  const seedDate = todayInZone(profile.timeZone);
+  const { error } = await supabase.rpc("seed_demo_data", { p_seed_date: seedDate });
+  // Sample tasks and milestones come from migration 0010; if it is not applied yet the programmes still load.
+  const planning = error ? null : await supabase.rpc("seed_demo_planning", { p_seed_date: seedDate });
   refresh();
-  redirect(error ? "/programmes?notice=seed-failed" : "/programmes?notice=seeded");
+  redirect(error ? "/programmes?notice=seed-failed" : planning?.error ? "/programmes?notice=seeded-no-planning" : "/programmes?notice=seeded");
 }
 
 /** Confirms or clears the self-check for the one requirement that takes no documents (academic). */

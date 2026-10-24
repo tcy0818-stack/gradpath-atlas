@@ -114,6 +114,34 @@ try {
   const linkStill = await A.client.from("requirement_documents").select("document_id").eq("document_id", doc.data.id);
   check("A's document and link are unchanged afterwards", linkStill.data?.length === 1, code(linkStill));
 
+  // --- Phase 5: tasks and deadlines ----------------------------------------------------------------------------
+  const dep = await A.client.from("tasks").insert({ title: tag, prerequisite_task_id: task.data.id, programme_id: pid }).select().single();
+  check("A can create a task that depends on A's task", !dep.error, code(dep));
+  const tRead = await B.client.from("tasks").select("id").eq("id", task.data.id);
+  check("B cannot read A's task", !tRead.error && tRead.data.length === 0, code(tRead));
+  const tUpd = await B.client.from("tasks").update({ status: "done" }).eq("id", task.data.id).select();
+  check("B cannot complete A's task", !tUpd.error && tUpd.data.length === 0, code(tUpd));
+  const tDel = await B.client.from("tasks").delete().eq("id", task.data.id).select();
+  check("B cannot delete A's task", !tDel.error && tDel.data.length === 0, code(tDel));
+  const blockedDone = await A.client.from("tasks").update({ status: "done" }).eq("id", dep.data?.id);
+  check("A cannot complete a task whose prerequisite is not done (database rule)", code(blockedDone) === "23514", code(blockedDone));
+  const loop = await A.client.from("tasks").update({ prerequisite_task_id: dep.data?.id }).eq("id", task.data.id);
+  check("A cannot create a prerequisite cycle (database rule)", code(loop) === "23514", code(loop));
+  const selfDep = await A.client.from("tasks").update({ prerequisite_task_id: task.data.id }).eq("id", task.data.id);
+  check("A cannot make a task its own prerequisite", Boolean(selfDep.error), code(selfDep));
+  const subDup = await A.client.from("deadlines").insert({ programme_id: pid, deadline_type: "submission", title: tag, due_date: "2027-02-01" });
+  check("A cannot add a second submission deadline to a programme", code(subDup) === "23505", code(subDup));
+  const miles = await A.client.from("deadlines").insert({ programme_id: pid, deadline_type: "milestone", title: tag, due_date: "2027-01-05" }).select().single();
+  check("A can add a milestone", !miles.error, code(miles));
+  const mDel = await B.client.from("deadlines").delete().eq("programme_id", pid).select();
+  check("B cannot delete A's deadlines", !mDel.error && mDel.data.length === 0, code(mDel));
+  const mDone = await B.client.from("deadlines").update({ is_done: true }).eq("id", miles.data?.id).select();
+  check("B cannot mark A's milestone done", !mDone.error && mDone.data.length === 0, code(mDone));
+  const planB = await B.client.rpc("seed_demo_planning", { p_seed_date: new Date().toISOString().slice(0, 10) });
+  const planAnon = await fresh().rpc("seed_demo_planning", { p_seed_date: "2026-10-25" });
+  check("B can run the planning seed for B's own account; anon is refused", !planB.error && Boolean(planAnon.error), code(planB) + code(planAnon));
+  await B.client.rpc("reset_demo_data");
+
   // --- profiles, history, demo-data functions ------------------------------------------------------------------
   const prof = await B.client.from("profiles").select("id");
   check("B sees only B's own profile", !prof.error && prof.data.length === 1 && prof.data[0].id === B.id, code(prof));

@@ -357,6 +357,22 @@ describe("cascade rules", () => {
     });
   });
 
+  it("prerequisites: blocked completion, self and cycle refused, reopening allowed, deleting a prerequisite unblocks", async () => {
+    await asA(async () => {
+      const a = (await one<{ id: string }>(`insert into public.tasks (title) values ('first') returning id`)).id;
+      const b = (await one<{ id: string }>(`insert into public.tasks (title, prerequisite_task_id) values ('second', $1) returning id`, [a])).id;
+      expect(await code(() => db.query(`update public.tasks set status = 'done' where id = $1`, [b]))).toBe("23514"); // blocked
+      expect(await code(() => db.query(`update public.tasks set prerequisite_task_id = $1 where id = $1`, [a]))).toBe("23514"); // self
+      expect(await code(() => db.query(`update public.tasks set prerequisite_task_id = $2 where id = $1`, [a, b]))).toBe("23514"); // cycle
+      await db.query(`update public.tasks set status = 'done' where id = $1`, [a]);
+      expect(await code(() => db.query(`update public.tasks set status = 'done' where id = $1`, [b]))).toBe("ok");
+      await db.query(`update public.tasks set status = 'todo' where id = $1`, [a]); // reopen the prerequisite
+      expect((await one<{ status: string }>(`select status from public.tasks where id = $1`, [b])).status).toBe("done"); // known limit, documented in 0006
+      await db.query(`delete from public.tasks where id = $1`, [a]);
+      expect((await one<{ p: string | null }>(`select prerequisite_task_id as p from public.tasks where id = $1`, [b])).p).toBeNull();
+    });
+  });
+
   it("deleting a document removes only its links", async () => {
     await asA(async () => {
       const p = await prog("casc3");
@@ -418,6 +434,32 @@ describe("demo seed and reset (SEED-01..03)", () => {
     await seed(D, "2026-12-28");
     const r = await as(D, "authenticated", () => one<{ d: string }>(`select due_date::text as d from public.deadlines where sample_key = 'aldermoor-marketing-analytics-submission'`));
     expect(r.d).toBe("2027-01-03");
+  });
+
+  it("seed_demo_planning adds tasks, a prerequisite chain and milestones once, anchored to the seed date", async () => {
+    const E = (await one<{ id: string }>(`insert into auth.users (email) values ('e@example.com') returning id`)).id;
+    const plan = (date = "2026-10-25") => as(E, "authenticated", async () => (await one<{ n: number }>(`select public.seed_demo_planning($1::date) as n`, [date])).n);
+    await seed(E);
+    expect(await plan()).toBe(8);
+    const snap = () => as(E, "authenticated", async () => ({ tasks: await count("tasks", "sample_key is not null"), deadlines: await count("deadlines", "sample_key is not null") }));
+    const first = await snap();
+    expect(first).toEqual({ tasks: 8, deadlines: 8 });
+    expect(await plan()).toBe(8); // repeat adds nothing
+    expect(await snap()).toEqual(first);
+    await as(E, "authenticated", async () => {
+      const chain = (await db.query<{ t: string; p: string }>(`select t.sample_key as t, pre.sample_key as p from public.tasks t join public.tasks pre on pre.id = t.prerequisite_task_id`)).rows;
+      expect(chain).toEqual(expect.arrayContaining([{ t: "task-submit-aldermoor", p: "task-draft-statement" }, { t: "task-upload-portfolio", p: "task-finalise-portfolio" }]));
+      const due = await one<{ d: string }>(`select due_date::text as d from public.tasks where sample_key = 'task-request-references'`);
+      expect(due.d).toBe("2026-10-23"); // overdue by two days
+      expect(await count("tasks", "sample_key = 'task-research-scholarships' and due_date is null and status = 'done'")).toBe(1);
+    });
+    expect(await as(B, "authenticated", () => count("tasks", "sample_key is not null"))).toBe(0);
+    await as(E, "authenticated", () => db.query(`select public.reset_demo_data()`));
+    expect(await snap()).toEqual({ tasks: 0, deadlines: 0 });
+  });
+
+  it("seed_demo_planning is refused for anon", async () => {
+    expect(await as(null, "anon", () => code(() => db.query(`select public.seed_demo_planning('2026-10-25')`)))).toBe("42501");
   });
 
   it("reset removes only sample rows and leaves manual records alone; reseed restores", async () => {

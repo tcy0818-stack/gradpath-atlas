@@ -11,6 +11,7 @@ export const metadata: Metadata = { title: "Programmes" };
 const NOTICES: Record<string, { tone: "success" | "error"; text: string }> = {
   deleted: { tone: "success", text: "Programme deleted. Your reusable documents were kept." },
   seeded: { tone: "success", text: "Fictional example programmes are loaded next to your own. They are invented for demonstration and labelled as such; loading them again adds nothing." },
+  "seeded-no-planning": { tone: "error", text: "The example programmes are loaded, but the sample tasks and milestones were not. Apply migration 0010_seed_planning.sql in Supabase, then load the examples again." },
   "seed-failed": { tone: "error", text: "Couldn't load the examples. Try again in a moment." },
 };
 
