@@ -284,7 +284,7 @@ Every criterion is written to be checkable. "Gate" names the verification type u
 | SEC-01 | Row Level Security on every user-owned table for SELECT/INSERT/UPDATE/DELETE. | A catalog query shows RLS enabled and policy coverage for each op on each table; unauthenticated (anon) access returns no rows and cannot write. | p.33 |
 | SEC-02 | Database-level ownership of relationships. | Using two test users, user B cannot insert a task, deadline, requirement or document link that references user A's programme/requirement/document/task UUID, even via direct API calls; all attempts fail. | p.33 |
 | SEC-03 | Secret and config hygiene. | `.env.example` lists names with safe placeholders; real env files are git-ignored; the app prints a clear message for each missing variable; no secret appears in the client bundle (search of `.next/static`). | p.43 |
-| SEC-04 | Admin credential isolation. | The service-role key is read only in one server-only module used by the account-deletion route; it is never prefixed `NEXT_PUBLIC_`. | p.43 |
+| SEC-04 | Admin credential isolation. | The Supabase secret key (formerly "service role") is read only in one server-only module used by the account-deletion route; it is never prefixed `NEXT_PUBLIC_`. | p.43 |
 | SEC-05 | Account and data deletion. | In Settings the user can delete their account after typing a confirmation; afterwards sign-in fails and no rows with that owner remain; another user's data is unchanged. | p.33 |
 | SEC-06 | Export privacy. | Export endpoints require a session and return only the caller's rows (verified with two users). | p.28 |
 | SEC-07 | Spreadsheet-formula neutralisation. | A programme named `=HYPERLINK("http://x","x")`, `+1`, `-1`, `@SUM(1)` or beginning with a tab/CR is exported with a leading `'` (or equivalent); a unit test covers each prefix. | — |
@@ -514,10 +514,10 @@ Everything else (UI kits, state libraries, charting, date libraries, ORM, paymen
 
 ```
 Browser ──(HTTPS)──> Next.js on Vercel
-   │                    ├─ Server Components / Server Actions  ── user-scoped Supabase client (anon key + user's cookie session)
+   │                    ├─ Server Components / Server Actions  ── user-scoped Supabase client (publishable key + user's cookie session)
    │                    ├─ Route Handlers (export, callback)    ── same, RLS applies
-   │                    └─ /api/account/delete  ── service-role client (server-only env var, used here only)
-   └─ never sees the service-role key
+   │                    └─ /api/account/delete  ── secret-key client (server-only env var, used here only)
+   └─ never sees the secret key
                          Supabase: Auth (users, sessions) · PostgreSQL (RLS on every table)
 ```
 
@@ -753,7 +753,7 @@ Documents include a ready transcript, ready CV, draft statement, a ready-but-**e
 
 | Integration | Use | Authenticated operations |
 | --- | --- | --- |
-| Supabase Auth | Email/password sign-up, verification, sign-in, sign-out, reset | Browser/server calls with the anon key and the user session. |
+| Supabase Auth | Email/password sign-up, verification, sign-in, sign-out, reset | Browser/server calls with the publishable key and the user session. |
 | Supabase PostgreSQL | All data, RLS | User-scoped queries via the SSR client. |
 | Supabase Admin API | **Only** `auth.admin.deleteUser` in `/api/account/delete`, after verifying the caller's session | Service-role key, server only. |
 | Vercel | Hosting, env vars, preview/production deployments | Manual by the student. |
@@ -763,9 +763,9 @@ Documents include a ready transcript, ready CV, draft statement, a ready-but-**e
 | Variable | Exposure | Purpose |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser-safe | Project URL. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser-safe (protected by RLS) | Public API key. The provider's current name for this key is verified in Phase 1. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser-safe (protected by RLS) | Public API key (`sb_publishable_…`). Checked against Supabase's current API-keys and Next.js SSR guides in Phase 1: the publishable key replaces the legacy `anon` key, which Supabase says is being deprecated by the end of 2026. |
 | `NEXT_PUBLIC_SITE_URL` | Browser-safe | Used to build redirect links. |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Secret, server only** | Account deletion only. Never `NEXT_PUBLIC_`. |
+| `SUPABASE_SECRET_KEY` | **Secret, server only** | Account deletion only (`sb_secret_…`; replaces the legacy `service_role` key). Never `NEXT_PUBLIC_`. |
 
 `.env.example` holds placeholders; `.env*` real files are git-ignored. A startup check names each missing variable (SEC-03). Secrets go into Vercel's environment settings, not GitHub (Brief p.18).
 

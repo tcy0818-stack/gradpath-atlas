@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/* Light, neutral base. Full design tokens are defined in Phase 7 (M6.01). */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f2a43;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}

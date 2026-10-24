@@ -1,0 +1,36 @@
+# Secrets and local environment (keep .env.example trackable)
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+
+# Supabase local state
+supabase/.temp/
+supabase/.branches/
+
+# Copyrighted assignment / course material and any text extracted from it
+Lecture/
+*.pdf
+extracted/
+course-text/
+*.extracted.txt
+*.p.txt
+
+# Local tooling, logs, OS and editor files
+.claude/settings.local.json
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
