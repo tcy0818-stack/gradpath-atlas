@@ -1,7 +1,8 @@
 import { formatIsoDate } from "@/lib/dates";
+import type { Readiness, ReqReadiness } from "@/lib/readiness";
 import { LEVEL_LABELS, REQUIREMENT_LABELS, REQUIREMENT_TYPES, STATUS_LABELS, type Programme, type Requirement } from "./types";
 
-export type Column = { programme: Programme; deadline: string | null; requirements: Requirement[] };
+export type Column = { programme: Programme; deadline: string | null; requirements: Requirement[]; readiness?: Readiness };
 /** kind says how to read the text: a real value, an unknown, a not-applicable, or nothing recorded at all. */
 export type Cell = { text: string; kind: "value" | "unknown" | "na" | "missing"; lowest?: boolean };
 export type MatrixRow = { key: string; label: string; group: "overview" | "requirements"; cells: Cell[]; differs: boolean; note?: string };
@@ -19,12 +20,15 @@ export function tuitionLabel(p: Pick<Programme, "tuition_state" | "tuition_amoun
   return p.tuition_state === "not_applicable" ? "Not applicable" : "Unknown";
 }
 
-function requirementCell(r: Requirement | undefined): Cell {
+const STATE_TEXT = { satisfied: "satisfied", missing: "missing" } as const;
+
+function requirementCell(r: Requirement | undefined, item?: ReqReadiness): Cell {
   if (!r) return { text: "Not recorded", kind: "missing" };
   if (r.level === "unknown") return unknown;
   if (r.level === "not_applicable") return { text: "Not applicable", kind: "na" };
   const qty = r.requirement_type === "references" && r.quantity > 1 ? ` (${r.quantity})` : "";
-  return value(`${LEVEL_LABELS[r.level]}${qty}${r.detail ? `: ${r.detail}` : ""}`);
+  const state = item && (item.state === "satisfied" || item.state === "missing") ? `, ${STATE_TEXT[item.state]} (${item.have} of ${item.need})` : "";
+  return value(`${LEVEL_LABELS[r.level]}${qty}${state}${r.detail ? `: ${r.detail}` : ""}`);
 }
 
 const differs = (cells: Cell[]) => new Set(cells.map((c) => `${c.kind}|${c.text}`)).size > 1;
@@ -66,7 +70,11 @@ export function buildMatrix(cols: Column[]): MatrixRow[] {
   ];
 
   const requirements = REQUIREMENT_TYPES.filter((t) => cols.some((c) => c.requirements.some((r) => r.requirement_type === t))).map((t) =>
-    row(`req-${t}`, REQUIREMENT_LABELS[t], "requirements", cols.map((c) => requirementCell(c.requirements.find((r) => r.requirement_type === t)))),
+    row(`req-${t}`, REQUIREMENT_LABELS[t], "requirements", cols.map((c) => requirementCell(c.requirements.find((r) => r.requirement_type === t), c.readiness?.items.find((i) => i.requirement.requirement_type === t)))),
   );
-  return [...overview, ...requirements];
+  // Same figure as the programme page: both come from computeReadiness (RDY-02).
+  const readiness = cols.some((c) => c.readiness)
+    ? [row("readiness", "Document readiness", "requirements", cols.map((c) => (c.readiness && c.readiness.required > 0 ? value(c.readiness.label) : { text: "No required requirements recorded", kind: "unknown" as const })))]
+    : [];
+  return [...overview, ...readiness, ...requirements];
 }

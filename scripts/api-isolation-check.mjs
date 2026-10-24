@@ -98,6 +98,22 @@ try {
   const l2 = await B.client.from("requirement_documents").insert({ requirement_id: req.data.id, document_id: doc.data.id });
   check("B cannot link A's document to A's requirement (FK)", code(l2) === "23503", code(l2));
 
+  // --- Phase 4: documents and links ---------------------------------------------------------------------------
+  const ownLink = await A.client.from("requirement_documents").insert({ requirement_id: req.data.id, document_id: doc.data.id });
+  check("A can link A's document to A's requirement", !ownLink.error, code(ownLink));
+  const docRead = await B.client.from("documents").select("id").eq("id", doc.data.id);
+  check("B cannot read A's document", !docRead.error && docRead.data.length === 0, code(docRead));
+  const linkRead = await B.client.from("requirement_documents").select("document_id").eq("document_id", doc.data.id);
+  check("B cannot read A's document links", !linkRead.error && linkRead.data.length === 0, code(linkRead));
+  const docUpd = await B.client.from("documents").update({ prep_status: "ready" }).eq("id", doc.data.id).select();
+  check("B cannot change A's document", !docUpd.error && docUpd.data.length === 0, code(docUpd));
+  const linkDel = await B.client.from("requirement_documents").delete().eq("document_id", doc.data.id).select();
+  check("B cannot unlink A's document", !linkDel.error && linkDel.data.length === 0, code(linkDel));
+  const docDel = await B.client.from("documents").delete().eq("id", doc.data.id).select();
+  check("B cannot delete A's document", !docDel.error && docDel.data.length === 0, code(docDel));
+  const linkStill = await A.client.from("requirement_documents").select("document_id").eq("document_id", doc.data.id);
+  check("A's document and link are unchanged afterwards", linkStill.data?.length === 1, code(linkStill));
+
   // --- profiles, history, demo-data functions ------------------------------------------------------------------
   const prof = await B.client.from("profiles").select("id");
   check("B sees only B's own profile", !prof.error && prof.data.length === 1 && prof.data[0].id === B.id, code(prof));

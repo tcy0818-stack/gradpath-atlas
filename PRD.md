@@ -713,7 +713,7 @@ create policy <t>_delete on public.<t> for delete to authenticated using (owner_
 
 **Deadline classification.** Outstanding = not done, and (if tied to a programme) the programme status is `researching` or `preparing`. Then: `due < today` → *Overdue*; `due = today` → *Due today* (shown in the *Due soon* group); `today < due ≤ today + 14` → *Due soon*; otherwise → *Later*. (The 14-day window is an assumption [Asm].)
 
-**Requirement satisfaction.** Only `level = 'required'` counts toward progress. For document-backed types a requirement is satisfied when the number of linked documents that are `prep_status = 'ready'`, **not expired** (`expiry_date` null or ≥ today) and of the **matching type** is ≥ `quantity`. Type match: transcript→`transcript`, statement→`statement`, references→`reference_letter`, cv→`cv`, language→`language_certificate`, test_score→`test_report`, portfolio→`portfolio`, other→`other`. `academic` is self-checked (`self_confirmed`).
+**Requirement satisfaction.** Only `level = 'required'` counts toward progress. For document-backed types a requirement is satisfied when the number of linked documents that are `prep_status = 'ready'`, **not expired** (`expiry_date` null or ≥ today) and of the **matching type** is ≥ `quantity`. Type match: transcript→`transcript`, statement→`statement`, references→`reference_letter`, cv→`cv`, language→`language_certificate`, test_score→`test_report`, portfolio→`portfolio`, other→`other`. `academic` is self-checked (`self_confirmed`). A document whose expiry date is today still counts; one that expired yesterday does not (`expiry_date` is the last valid day). *Implementation note (Phase 4):* `other` is document-backed (matching `other` documents), as written here; the §5.3 column note that also lists `other` as self-checked is superseded.
 
 **Programme preparation progress.** `satisfied required requirements ÷ all required requirements`, shown as "3 of 5 required satisfied". Optional, not-applicable and unknown requirements are excluded from the denominator; unknown ones are listed as "needs checking". **If a programme has no required requirements, progress shows "No required requirements recorded" — not 0% and not 100%.** Task completion (done ÷ tasks for that programme) is a separate figure. *Application status* (`programmes.status`) is a third, separate indicator.
 
@@ -866,7 +866,7 @@ This PRD is a specification. No requirement has been verified. Personas, prices,
 | Programme comparison table (p.28–29) | CMP-01…05, PRG-03 | `/programmes`, `/compare`, `src/lib/compare.ts` | M5.02, M5.08 | Pending (Phase 3) |
 | Programme CRUD, detail, notes, status (p.28–29) | PRG-01…07, REQ-01/02 | `/programmes/[id]`, server actions | M5.01, M5.03–M5.07 | Pending (Phase 3) |
 | Deadline tracker (p.28–29) | DL-01…05 | `/deadlines`, `src/lib/dates.ts` | M5.16–M5.18 | Pending (Phase 5) |
-| Document tracker, reusable links (p.28–29, p.11) | DOC-01…05, RDY-01/02 | `/documents`, `src/lib/readiness.ts` | M5.11–M5.15 | Pending (Phase 4) |
+| Document tracker, reusable links (p.28–29, p.11) | DOC-01…05, RDY-01/02 | `/documents`, `src/lib/readiness.ts` | M5.11–M5.15 | Built in Phase 4; unit-tested; browser checks pending (M5.12–M5.15) |
 | Task list, prerequisites, progress (p.28, p.11) | TSK-01…05 | `/tasks`, `src/lib/tasks.ts` | M5.19, M5.20, M5.22 | Pending (Phase 5) |
 | Search, filters, sorting (p.28) | CMP-03, TSK-02, DL-02 | list pages | M5.02, M5.20, M5.17 | Pending (Phases 3, 5) |
 | Optional adviser review view (p.28–29) | ADV-01 | `/adviser` | M5.25 | Pending (Phase 6) |

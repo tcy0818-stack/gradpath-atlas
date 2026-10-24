@@ -343,6 +343,20 @@ describe("cascade rules", () => {
     });
   });
 
+  it("one document links to two programmes; unlinking one leaves the other; a duplicate link is refused", async () => {
+    await asA(async () => {
+      const mkReq = async (name: string) => (await one<{ id: string }>(`insert into public.requirements (programme_id, requirement_type) values ($1,'cv') returning id`, [await prog(name)])).id;
+      const [r1, r2] = [await mkReq("reuse1"), await mkReq("reuse2")];
+      const d = (await one<{ id: string }>(`insert into public.documents (title, doc_type) values ('reused cv','cv') returning id`)).id;
+      await db.query(`insert into public.requirement_documents (requirement_id, document_id) values ($1,$3),($2,$3)`, [r1, r2, d]);
+      expect(await code(() => db.query(`insert into public.requirement_documents (requirement_id, document_id) values ($1,$2)`, [r1, d]))).toBe("23505");
+      await db.query(`delete from public.requirement_documents where requirement_id = $1 and document_id = $2`, [r1, d]);
+      expect(await count("requirement_documents", `document_id = '${d}'`)).toBe(1);
+      expect(await count("requirement_documents", `requirement_id = '${r2}'`)).toBe(1);
+      expect(await count("documents", `id = '${d}'`)).toBe(1);
+    });
+  });
+
   it("deleting a document removes only its links", async () => {
     await asA(async () => {
       const p = await prog("casc3");

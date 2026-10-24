@@ -59,7 +59,7 @@ export function RequirementsEditor({ programmeId, requirements }: { programmeId:
     <div className="space-y-4">
       <p className="max-w-[65ch] text-sm text-ink-2">
         <strong>Unknown</strong> means you have not checked yet. <strong>Not applicable</strong> means the programme does not ask for it.
-        Linking documents and checking readiness come in a later step.
+        Link documents to these requirements under Readiness below.
       </p>
       {requirements.length === 0 ? (
         <p className="rounded-lg border border-dashed border-control p-4 text-ink-2">No requirements recorded yet. Add the first one below.</p>

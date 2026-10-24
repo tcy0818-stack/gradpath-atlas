@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DeleteProgramme, NotesForm, StatusForm } from "@/components/programmes/detail-forms";
 import { ProgrammeForm } from "@/components/programmes/programme-form";
+import { ReadinessPanel } from "@/components/programmes/readiness-panel";
 import { RequirementsEditor } from "@/components/programmes/requirements-editor";
 import { ExampleBadge, StatusBadge } from "@/components/programmes/status-badge";
 import { Alert, quietButton, textLink } from "@/components/ui";
 import { getProfile } from "@/lib/auth/dal";
 import { formatIsoDate } from "@/lib/dates";
+import { listDocumentFacts } from "@/lib/documents/queries";
 import { setShortlistAction, updateProgrammeAction } from "@/lib/programmes/actions";
 import { getProgrammeDetail } from "@/lib/programmes/queries";
 import { STATUS_LABELS } from "@/lib/programmes/types";
@@ -21,7 +23,7 @@ const NOTICES: Record<string, string> = {
 export default async function ProgrammePage({ params, searchParams }: PageProps<"/programmes/[id]">) {
   const { id } = await params;
   const sp = await searchParams;
-  const [{ programme: p, requirements, deadline, history, impact }, profile] = await Promise.all([getProgrammeDetail(id), getProfile()]);
+  const [{ programme: p, requirements, deadline, history, impact, readiness, today }, profile, documents] = await Promise.all([getProgrammeDetail(id), getProfile(), listDocumentFacts()]);
   const notice = NOTICES[(Array.isArray(sp.notice) ? sp.notice[0] : sp.notice) ?? ""];
   const when = (iso: string) => new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: profile.timeZone }).format(new Date(iso));
 
@@ -36,6 +38,7 @@ export default async function ProgrammePage({ params, searchParams }: PageProps<
             <StatusBadge status={p.status} />
             {p.sample_key && <ExampleBadge />}
             {deadline && <span className="text-sm text-ink-2">Deadline {formatIsoDate(deadline)}</span>}
+            <span className="text-sm text-ink-2">Readiness: {readiness.label}</span>
           </div>
         </div>
         <form action={setShortlistAction}>
@@ -75,6 +78,11 @@ export default async function ProgrammePage({ params, searchParams }: PageProps<
         <section aria-labelledby="req-h">
           <h2 id="req-h" className="mb-3 text-lg font-semibold">Requirements</h2>
           <RequirementsEditor programmeId={p.id} requirements={requirements} />
+        </section>
+
+        <section aria-labelledby="ready-h">
+          <h2 id="ready-h" className="mb-3 text-lg font-semibold">Readiness</h2>
+          <ReadinessPanel readiness={readiness} documents={documents} today={today} />
         </section>
 
         <section aria-labelledby="notes-h">

@@ -5,16 +5,13 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/lib/auth/actions";
 import { getProfile, requireUser } from "@/lib/auth/dal";
 import { todayInZone } from "@/lib/dates";
+import { bad, echo, saved, text } from "@/lib/form-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { dbErrorMessage } from "./db-error";
 import { idSchema, notesSchema, parseForm, programmeSchema, requirementSchema, statusSchema } from "./schemas";
 
 // Every action re-checks the session and writes with the user's own session: ownership is enforced by Row Level
 // Security and the (owner_id, id) foreign keys, never by a privileged key (SEC-02). Errors become fixed sentences.
-const text = (fd: FormData, k: string) => (typeof fd.get(k) === "string" ? (fd.get(k) as string) : "");
-const bad = (message: string, fd?: FormData): FormState => ({ status: "error", message, values: fd ? echo(fd) : undefined });
-const echo = (fd: FormData) => Object.fromEntries([...fd.entries()].filter((e): e is [string, string] => typeof e[1] === "string"));
-const saved = (message = "Saved."): FormState => ({ status: "success", message });
 const refresh = (id?: string) => {
   revalidatePath("/programmes");
   revalidatePath("/compare");
@@ -152,4 +149,17 @@ export async function loadExamplesAction(): Promise<void> {
   const { error } = await supabase.rpc("seed_demo_data", { p_seed_date: todayInZone(profile.timeZone) });
   refresh();
   redirect(error ? "/programmes?notice=seed-failed" : "/programmes?notice=seeded");
+}
+
+/** Confirms or clears the self-check for the one requirement that takes no documents (academic). */
+export async function setSelfConfirmedAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const id = idSchema.safeParse(text(fd, "id"));
+  if (!id.success) return bad("That requirement could not be found.");
+  const value = text(fd, "value") === "1";
+  const supabase = await ctx();
+  const upd = await supabase.from("requirements").update({ self_confirmed: value }).eq("id", id.data).eq("requirement_type", "academic").select("programme_id");
+  if (upd.error) return bad(dbErrorMessage(upd.error));
+  if (!upd.data?.length) return bad("That requirement could not be found.");
+  refresh(upd.data[0].programme_id as string);
+  return saved(value ? "Marked as met." : "Marked as not met.");
 }

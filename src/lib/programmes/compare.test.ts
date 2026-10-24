@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildMatrix, type Column } from "./compare";
+import { computeReadiness } from "@/lib/readiness";
 import type { Programme, Requirement } from "./types";
 
 const prog = (o: Partial<Programme>): Programme => ({
@@ -69,5 +70,13 @@ describe("buildMatrix", () => {
   it("only lists requirement types recorded on at least one programme", () => {
     const rows = buildMatrix([col({}, [req({ requirement_type: "cv" })]), col({})]);
     expect(rows.filter((r) => r.group === "requirements").map((r) => r.key)).toEqual(["req-cv"]);
+  });
+
+  it("shows the same readiness figure as the shared calculation, and a requirement's state", () => {
+    const reqs = [req({ id: "a", requirement_type: "transcript" }), req({ id: "b", requirement_type: "cv", level: "optional" })];
+    const ready = computeReadiness(reqs, new Map([["a", [{ id: "d", title: "T", doc_type: "transcript", prep_status: "ready", expiry_date: null }]]]), "2026-10-25");
+    const rows = buildMatrix([{ ...col({}, reqs), readiness: ready }, { ...col({}, []), readiness: computeReadiness([], new Map(), "2026-10-25") }]);
+    expect(get(rows, "readiness").cells.map((c) => c.text)).toEqual(["1 of 1 required satisfied", "No required requirements recorded"]);
+    expect(get(rows, "req-transcript").cells[0].text).toContain("satisfied (1 of 1)");
   });
 });

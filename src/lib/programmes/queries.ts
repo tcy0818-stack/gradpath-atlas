@@ -1,22 +1,17 @@
 import "server-only";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth/dal";
-import { createClient } from "@/lib/supabase/server";
+import { getProfile } from "@/lib/auth/dal";
+import { todayInZone } from "@/lib/dates";
+import { db, must } from "@/lib/db";
+import { loadLinkedDocs } from "@/lib/documents/queries";
+import { computeReadiness, type Readiness } from "@/lib/readiness";
 import type { Column } from "./compare";
 import type { ListRow } from "./list";
 import { idSchema } from "./schemas";
 import type { Programme, Requirement, StatusHistoryRow } from "./types";
 
-// Every query runs with the signed-in user's own session, so Row Level Security decides what is visible.
-// A failed read throws; (workspace)/error.tsx shows a recoverable message.
-async function db() {
-  await requireUser();
-  return createClient();
-}
-const must = <T,>(r: { data: T | null; error: unknown }, what: string): T => {
-  if (r.error || r.data == null) throw new Error(`Could not load ${what}.`);
-  return r.data;
-};
+// Queries use the signed-in user's own session (src/lib/db.ts), so Row Level Security decides what is visible.
+const todayForUser = async () => todayInZone((await getProfile()).timeZone);
 
 export async function listProgrammeRows(): Promise<ListRow[]> {
   const supabase = await db();
@@ -34,6 +29,9 @@ export type ProgrammeDetail = {
   requirements: Requirement[];
   deadline: string | null;
   history: StatusHistoryRow[];
+  /** Calculated from the requirements and their linked documents; never stored. */
+  readiness: Readiness;
+  today: string;
   /** What deleting the programme removes, for the confirmation dialog (PRG-04). */
   impact: { requirements: number; deadlines: number; tasks: number; documentLinks: number };
 };
@@ -52,15 +50,17 @@ export async function getProgrammeDetail(id: string): Promise<ProgrammeDetail> {
   ]);
   const requirements = must(req, "requirements") as Requirement[];
   const deadlines = must(dl, "deadlines") as { due_date: string; deadline_type: string }[];
-  const links = requirements.length
-    ? await supabase.from("requirement_documents").select("document_id", { count: "exact", head: true }).in("requirement_id", requirements.map((r) => r.id))
-    : { count: 0, error: null };
+  const linked = await loadLinkedDocs(supabase, requirements.map((r) => r.id));
+  const today = await todayForUser();
+  const documentLinks = [...linked.values()].reduce((n, d) => n + d.length, 0);
   return {
     programme: p.data as Programme,
     requirements,
     deadline: deadlines.find((d) => d.deadline_type === "submission")?.due_date ?? null,
     history: must(hist, "status history") as StatusHistoryRow[],
-    impact: { requirements: requirements.length, deadlines: deadlines.length, tasks: tasks.count ?? 0, documentLinks: links.count ?? 0 },
+    readiness: computeReadiness(requirements, linked, today),
+    today,
+    impact: { requirements: requirements.length, deadlines: deadlines.length, tasks: tasks.count ?? 0, documentLinks },
   };
 }
 
@@ -77,8 +77,11 @@ export async function getCompareColumns(ids: string[]): Promise<Column[]> {
   const programmes = new Map((must(p, "programmes") as Programme[]).map((x) => [x.id, x]));
   const reqs = must(r, "requirements") as Requirement[];
   const due = new Map((must(d, "deadlines") as { programme_id: string; due_date: string }[]).map((x) => [x.programme_id, x.due_date]));
+  const [linked, today] = await Promise.all([loadLinkedDocs(supabase, reqs.map((x) => x.id)), todayForUser()]);
   return valid.flatMap((id) => {
     const programme = programmes.get(id);
-    return programme ? [{ programme, deadline: due.get(id) ?? null, requirements: reqs.filter((x) => x.programme_id === id) }] : [];
+    if (!programme) return [];
+    const requirements = reqs.filter((x) => x.programme_id === id);
+    return [{ programme, deadline: due.get(id) ?? null, requirements, readiness: computeReadiness(requirements, linked, today) }];
   });
 }

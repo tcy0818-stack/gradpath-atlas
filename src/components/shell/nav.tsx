@@ -9,7 +9,7 @@ const ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Programmes", href: "/programmes" },
   { label: "Compare", href: "/compare" },
-  { label: "Documents", href: null },
+  { label: "Documents", href: "/documents" },
   { label: "Tasks", href: null },
   { label: "Deadlines", href: null },
   { label: "Adviser preview", href: null },

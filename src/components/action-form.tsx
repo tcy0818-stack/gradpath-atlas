@@ -7,7 +7,7 @@ import { Alert, quietButton } from "@/components/ui";
 
 const initial: FormState = { status: "idle" };
 
-function Submit({ label, pendingLabel, className }: { label: string; pendingLabel: string; className: string }) {
+function Submit({ label, pendingLabel, className }: { label: ReactNode; pendingLabel: string; className: string }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className={className}>
@@ -32,7 +32,7 @@ export function ActionForm({
   action: (prev: FormState, fd: FormData) => Promise<FormState>;
   /** Either static fields, or a function that receives the last result (field errors and echoed values). */
   children: ReactNode | ((state: FormState) => ReactNode);
-  submitLabel?: string;
+  submitLabel?: ReactNode;
   pendingLabel?: string;
   submitClassName?: string;
   className?: string;
