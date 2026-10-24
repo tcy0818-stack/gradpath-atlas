@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 // instead of leading to empty pages. Add a route here when its phase ships.
 const ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Programmes", href: null },
-  { label: "Compare", href: null },
+  { label: "Programmes", href: "/programmes" },
+  { label: "Compare", href: "/compare" },
   { label: "Documents", href: null },
   { label: "Tasks", href: null },
   { label: "Deadlines", href: null },
@@ -16,10 +16,14 @@ const ITEMS = [
   { label: "Settings", href: null },
 ] as const;
 
-const row = "flex min-h-11 items-center justify-between gap-2 rounded-lg px-3 text-[0.9375rem]";
+const row = "flex min-h-11 items-center justify-between gap-2 rounded-lg px-3 text-base";
 
+/** Reads the URL, which is only known at request time on dynamic routes: render inside <Suspense fallback={<NavView />}>. */
 export function Nav() {
-  const pathname = usePathname();
+  return <NavView pathname={usePathname()} />;
+}
+
+export function NavView({ pathname = "" }: { pathname?: string }) {
   return (
     <nav aria-label="Workspace">
       <ul className="space-y-0.5">

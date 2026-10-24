@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { Brand } from "@/components/brand";
 import { MobileMenu } from "./mobile-menu";
-import { Nav } from "./nav";
+import { Nav, NavView } from "./nav";
 
 /** Presentational frame: navy rail (top header with a Menu on small screens), account bar, main column. */
 export function WorkspaceShell({ account, children }: { account: ReactNode; children: ReactNode }) {
@@ -17,7 +17,9 @@ export function WorkspaceShell({ account, children }: { account: ReactNode; chil
       <header className="on-dark bg-rail px-3 py-1 lg:hidden">
         <div className="flex items-center justify-between">
           <Brand onDark href="/dashboard" />
-          <MobileMenu />
+          <Suspense fallback={<span className="flex min-h-11 items-center px-3 text-sm font-semibold text-rail-ink">Menu</span>}>
+            <MobileMenu />
+          </Suspense>
         </div>
       </header>
 
@@ -25,7 +27,9 @@ export function WorkspaceShell({ account, children }: { account: ReactNode; chil
         <div className="mb-6 px-1">
           <Brand onDark href="/dashboard" />
         </div>
-        <Nav />
+        <Suspense fallback={<NavView />}>
+          <Nav />
+        </Suspense>
       </aside>
 
       <div className="flex min-h-dvh min-w-0 flex-col">

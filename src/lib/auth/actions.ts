@@ -14,6 +14,8 @@ export type FormState = {
   fieldErrors?: Record<string, string>;
   /** Echoed back so the email field survives a failed submit. Passwords are never echoed. */
   email?: string;
+  /** Submitted text fields, echoed back after a rejected save because React clears uncontrolled inputs after an action. */
+  values?: Record<string, string>;
 };
 
 const text = (fd: FormData, key: string) => (typeof fd.get(key) === "string" ? (fd.get(key) as string) : "");

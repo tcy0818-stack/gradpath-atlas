@@ -62,6 +62,25 @@ try {
   const still = await A.client.from("programmes").select("programme_name").eq("id", pid).single();
   check("A's programme is unchanged afterwards", still.data?.programme_name === "A programme", code(still));
 
+  // --- Phase 3 operations: requirements, deadlines, status history, shortlist ---------------------------------
+  const dl = await A.client.from("deadlines").insert({ programme_id: pid, deadline_type: "submission", title: tag, due_date: "2027-01-15" }).select().single();
+  check("A can set a submission deadline", !dl.error, code(dl));
+  const reqUpd = await B.client.from("requirements").update({ level: "optional" }).eq("id", req.data.id).select();
+  check("B cannot update A's requirement", !reqUpd.error && reqUpd.data.length === 0, code(reqUpd));
+  const reqDel = await B.client.from("requirements").delete().eq("id", req.data.id).select();
+  check("B cannot delete A's requirement", !reqDel.error && reqDel.data.length === 0, code(reqDel));
+  const dlRead = await B.client.from("deadlines").select("id").eq("programme_id", pid);
+  check("B cannot read A's deadlines", !dlRead.error && dlRead.data.length === 0, code(dlRead));
+  const dlUpd = await B.client.from("deadlines").update({ due_date: "2030-01-01" }).eq("programme_id", pid).select();
+  check("B cannot change A's deadline", !dlUpd.error && dlUpd.data.length === 0, code(dlUpd));
+  const histRead = await B.client.from("programme_status_history").select("id").eq("programme_id", pid);
+  check("B cannot read A's status history", !histRead.error && histRead.data.length === 0, code(histRead));
+  const star = await B.client.from("programmes").update({ is_shortlisted: true }).eq("id", pid).select();
+  check("B cannot shortlist or change A's programme status", !star.error && star.data.length === 0, code(star));
+  const statusA = await A.client.from("programmes").update({ status: "preparing" }).eq("id", pid).select("status").single();
+  const histA = await A.client.from("programme_status_history").select("to_status").eq("programme_id", pid);
+  check("A's own status change is recorded in history", statusA.data?.status === "preparing" && histA.data?.some((h) => h.to_status === "preparing"), code(statusA) + code(histA));
+
   // --- forged relationships ------------------------------------------------------------------------------------
   const asOwner = await B.client.from("programmes").insert({ owner_id: A.id, university_name: tag, programme_name: "forged owner" });
   check("B cannot insert a row owned by A (RLS)", code(asOwner) === "42501", code(asOwner));

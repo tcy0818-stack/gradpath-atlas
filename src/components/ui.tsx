@@ -14,42 +14,80 @@ type FieldProps = {
   id: string;
   name: string;
   label: string;
-  type?: "text" | "email" | "password";
+  type?: "text" | "email" | "password" | "number" | "date";
   autoComplete?: string;
   defaultValue?: string;
   hint?: string;
   error?: string;
+  /** Defaults to true. Optional fields say so in their label instead of relying on the browser's marker. */
+  required?: boolean;
+  disabled?: boolean;
+  inputMode?: "numeric" | "decimal";
+  min?: number | string;
+  max?: number | string;
+  step?: number | string;
+  maxLength?: number;
+  list?: string;
+  /** Renders a <select> with these options instead of an input. */
+  options?: readonly { value: string; label: string }[];
+  /** Renders a <textarea> with this many rows. */
+  rows?: number;
+  onChange?: (value: string) => void;
 };
 
-/** Labelled input; hint and error are linked with aria-describedby so screen readers read them with the field. */
-export function Field({ id, name, label, type = "text", autoComplete, defaultValue, hint, error }: FieldProps) {
+const control = (error?: string) =>
+  "mt-1.5 block min-h-11 w-full rounded-lg border bg-surface px-3 py-2 text-base text-ink disabled:bg-bg disabled:text-muted " +
+  (error ? "border-danger" : "border-control");
+
+/** Labelled input, select or textarea; hint and error are linked with aria-describedby so they are read with the field. */
+export function Field({ id, name, label, type = "text", autoComplete, defaultValue, hint, error, required = true, disabled, inputMode, min, max, step, maxLength, list, options, rows, onChange }: FieldProps) {
   const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
+  const shared = {
+    id,
+    name,
+    disabled,
+    required,
+    "aria-invalid": error ? true : undefined,
+    "aria-describedby": describedBy,
+    className: control(error),
+  } as const;
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-semibold text-ink">
         {label}
+        {!required && <span className="font-normal text-muted"> (optional)</span>}
       </label>
       {hint && (
         <p id={`${id}-hint`} className="mt-0.5 text-sm text-muted">
           {hint}
         </p>
       )}
-      <input
-        id={id}
-        name={name}
-        type={type}
-        autoComplete={autoComplete}
-        defaultValue={defaultValue}
-        required
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        spellCheck={type === "text" ? undefined : false}
-        autoCapitalize="none"
-        className={
-          "mt-1.5 block min-h-11 w-full rounded-lg border bg-surface px-3 py-2 text-base text-ink " +
-          (error ? "border-danger" : "border-control")
-        }
-      />
+      {options ? (
+        <select {...shared} defaultValue={defaultValue} onChange={onChange && ((e) => onChange(e.target.value))}>
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      ) : rows ? (
+        <textarea {...shared} rows={rows} maxLength={maxLength} defaultValue={defaultValue} />
+      ) : (
+        <input
+          {...shared}
+          type={type}
+          autoComplete={autoComplete}
+          defaultValue={defaultValue}
+          inputMode={inputMode}
+          min={min}
+          max={max}
+          step={step}
+          maxLength={maxLength}
+          list={list}
+          spellCheck={type === "text" ? undefined : false}
+          autoCapitalize={type === "text" ? undefined : "none"}
+        />
+      )}
       {error && (
         <p id={`${id}-error`} className="mt-1.5 flex items-start gap-1.5 text-sm text-danger">
           <StatusIcon tone="error" />
