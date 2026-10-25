@@ -11,6 +11,15 @@ Setup and deployment: [README.md](README.md). Requirement IDs: [PRD.md](PRD.md).
 | **Student-reported** | The student ran the check and reported the result; the agent did not see the output. |
 | **Not verified** | Not performed by anyone yet. |
 
+## Final review (2026-10-25, Node 22.23.4, npm 10.9.9)
+
+| Check | Result |
+| --- | --- |
+| `npm run lint` · `typecheck` · `test` · `build` | All exit 0; **18 files, 193 tests passed**; build compiled. Browser bundle: no secret-key name or `service_role`; no value-shaped keys in `.next` |
+| `.env.local` | All eight variables present; `NEXT_PUBLIC_SITE_URL` is localhost; the secret key is not a placeholder (values not shown) |
+| Production, signed out (agent-observed with HTTP requests and browser emulation, **not a real phone**) | `/`, `/pricing`, `/privacy`, `/login`, `/signup`, `/forgot-password` load; every private page and `/api/export/*` redirects to `/login?next=…`; `/reset-password` → `/forgot-password?error=expired`; bogus `/auth/callback` → `/login?error=link-invalid`; `?next=//evil.com` is ignored; unknown URL → 404 page. Landing at 375px: CTA visible above the fold, preview table scrolls sideways inside its region with the first column fixed, no page-level overflow; 768 and 1440px: table fits, no overflow. Empty sign-in shows linked field errors and focuses the first field. Pricing (signed out) shows "Start free" and "Sign in to try the simulated upgrade". No cookies set while signed out |
+| Not run | `npm run check:api-isolation` (it signs in to the hosted project and resets the test account's examples; left to the student). No signed-in production session was available, so the workspace on production was not observed by the agent |
+
 ## Results (2026-10-25, laptop, Node 26.12.1, npm 11.20.0)
 
 | Check | Result |
@@ -47,7 +56,7 @@ On the live site, signed in with a test account:
 
 - **Sign-up confirmation and password-reset emails** (`M3.03`, `M3.04`, `M3.07`, `M3.08`, `M3.12`). The test accounts were created and auto-confirmed manually, so they are **not** evidence that sign-up or email confirmation works. Supabase's built-in sender only reaches project-team addresses at about 2 per hour, so outside users cannot be assumed to receive mail. **Outstanding release configuration:** custom SMTP (or another deliberate arrangement) must be set up before outside users can sign up or reset passwords. See README "Email and sign-up".
 - Login failure text identical for unknown email vs wrong password (`M3.05`); sign-out followed by Back button (`M3.06`); time-zone sync on first sign-in (`M3.10`).
-- **The live deployment** (`M6.16`): no public URL exists yet. Signed-out access from another device is untested.
+- **The live deployment** (`M6.16`): deployed at https://mktg4150-asm1.vercel.app; signed-out behaviour was agent-observed (above), and the student reported the deployment setup passed. A signed-in smoke test on production (sample load, export) has not been recorded with results, and sign-up for outside users depends on custom SMTP.
 - Re-run on the final schema of `rls_coverage.sql`, `hosted_authz_check.sql` and `npm run check:api-isolation` (`M6.11`): migrations are unchanged since the student-reported runs, but the agent did not run them (it does not sign in to the hosted project), and the isolation script gained one check (another user cannot change a profile's simulated plan).
 - Print preview of the **Compare** page (`M4.07`); the adviser print preview was reported fine.
 - Automated accessibility scanning of rendered pages (no Chrome was available to the detector); no claim of WCAG conformance is made.

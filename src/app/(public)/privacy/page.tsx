@@ -18,7 +18,7 @@ export default function PrivacyPage() {
 
       <h2 className={h2}>What is stored</h2>
       <ul className={ul}>
-        <li>Your email address and a password (stored by the sign-in service as a hash; the app never sees or stores the plain password).</li>
+        <li>Your email address and a password. The app passes the password straight to the sign-in service and never stores it; the service keeps only a hash.</li>
         <li>An optional display name and your time zone.</li>
         <li>What you enter: programmes, requirements, notes, document <em>records</em>, tasks and deadlines.</li>
         <li>A simulated plan label and the time you chose it, if you try the pricing page.</li>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
       <h2 className={h2}>Who processes it</h2>
       <ul className={ul}>
         <li><strong>Supabase</strong> stores the database, handles sign-in and sends the confirmation and password-reset emails. Your data is only readable by your own account: every table is restricted to its owner.</li>
-        <li><strong>Vercel</strong> is the planned host for the web app, if it is deployed there.</li>
+        <li><strong>Vercel</strong> hosts the web app.</li>
       </ul>
       <p className={p}>No other third party receives your data. Fonts are served from your device, so no font provider is contacted. Supabase&apos;s own backup, log and location practices are outside this app and have not been reviewed here.</p>
 

@@ -4,7 +4,7 @@ A master's-application planning workspace (MKTG 4150 NPM, Assignment 1, hypothet
 
 Specification: [PRD.md](PRD.md). Build plan and evidence: [tasklist.md](tasklist.md). Test checklist and what is verified: [TESTING.md](TESTING.md).
 
-**Status:** Phases 0–8 are built. Local checks pass (see TESTING.md). **Not yet done:** public deployment, real email delivery for outside users, and the submission steps below.
+**Status:** Phases 0–8 are built and deployed at <https://mktg4150-asm1.vercel.app>. Local checks pass and the signed-out production checks were observed (see TESTING.md). **Not yet done:** email delivery for outside users (custom SMTP), the remaining checks in TESTING.md, and the submission steps below.
 
 ## Stack
 
@@ -13,7 +13,7 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Supabase 
 ## Node version
 
 - **Deploy and develop on Node 22.x.** `package.json` pins `engines.node` to `22.x`; Vercel currently offers 24.x (default) and 22.x, so 22.x is a supported choice ([Vercel docs](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions), checked 2026-10-25). Vercel lists Node 20 as being deprecated on 1 Oct 2026, so avoid 20.
-- Checks have also passed on Node 26.12.1 (laptop), which Vercel does **not** offer; `npm ci` there prints an engine warning only. Always confirm the Vercel project's Node version is 22.x.
+- Checks passed on Node 22.23.4 (final review) and 22.13.0 (desktop), and also on Node 26.12.1, which Vercel does **not** offer; `npm ci` on 26 prints an engine warning only. Always confirm the Vercel project's Node version is 22.x.
 
 ## Local setup
 
@@ -63,7 +63,7 @@ Supabase's **built-in email sender** only delivers to addresses of your project'
 
 **Redirect and template settings** (dashboard Authentication section: URL Configuration and Email Templates):
 
-- **Site URL** = the production URL (e.g. `https://<your-project>.vercel.app`).
+- **Site URL** = `https://mktg4150-asm1.vercel.app` (no trailing slash: the email templates below append `/auth/callback` to it).
 - **Redirect URLs:** add `http://localhost:3000/**` and the production URL with `/**` ([docs](https://supabase.com/docs/guides/auth/redirect-urls)). Vercel preview URLs need a separate pattern if you use them.
 - The app's `/auth/callback` accepts both `?code=` (same browser only) and `?token_hash=&type=` links. For links that work on any device, edit the **Confirm signup** template to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email` and the **Reset password** template to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery`.
 
