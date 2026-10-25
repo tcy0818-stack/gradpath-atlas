@@ -345,7 +345,7 @@ Every criterion is written to be checkable. "Gate" names the verification type u
 | DSH-04 | Empty state. | A user with no data sees a primary action to add a programme and another to load fictional examples. | p.29 |
 | ADV-01 | Adviser-review preview. | `/adviser` shows, read-only, the **current** user's shortlist, readiness, missing items and deadlines, labelled as a preview and not a shared-access feature. | p.28–29 |
 | SET-01 | Profile/preferences. | Display name and time zone are editable and used by date logic. | p.29 |
-| SET-02 | Sample-data reset. | "Reset fictional data" removes only sample records (and links depending on them) after confirmation and states how many records created by the user inside sample programmes would also go. | p.28 |
+| SET-02 | Sample-data reset. | "Reset fictional data" removes only sample records and everything attached to them after confirmation. Removing an example programme also removes its tasks, deadlines and requirements, including ones the user added; the dialog states how many of the user's own tasks and deadlines that affects. Standalone manual programmes, documents and tasks are preserved. | p.28 |
 | SET-03 | Pre-deletion export. | The deletion flow offers a data export first. | p.33 |
 | EXP-01 | CSV export. | Programme-summary CSV and actions CSV download with correct quoting. | p.28 |
 | EXP-02 | JSON export. | A JSON export of the user's records downloads. | p.28 |
@@ -356,7 +356,7 @@ Every criterion is written to be checkable. "Gate" names the verification type u
 | ID | Requirement | Acceptance criteria | Brief |
 | --- | --- | --- | --- |
 | SEED-01 | Fictional examples. | One action loads ~6 fictional programmes (varied currencies, statuses, requirements) with shared documents, tasks and deadlines. | p.28–29 |
-| SEED-02 | Idempotent and isolated. | Running it twice produces no duplicates; resetting removes only sample rows; manual rows remain. | p.28 |
+| SEED-02 | Idempotent and isolated. | Running it twice produces no duplicates; resetting removes only sample rows and what is attached to them; standalone manual rows remain. | p.28 |
 | SEED-03 | Relative dates. | Sample deadlines/expiries are computed from the explicit seeding date, include overdue, due-today and soon-due examples, and never change on page load. | — |
 | SEED-04 | Clearly fictional. | Every sample record is labelled "Fictional example"; no real university claims; contact addresses only at `example.com`. | p.29 |
 
@@ -453,7 +453,7 @@ Bias and ethics notes [Dec]: record sampling (friends and classmates bias result
 | `/deadlines` | Auth | Grouped chronological deadlines. |
 | `/adviser` | Auth | Read-only adviser-review preview of the current user's workspace. |
 | `/settings` | Auth | Profile, sample reset, export, sign out, delete account. |
-| `/api/export/…`, `/api/account/delete` | Auth | CSV/JSON download; deletion (server-only secret). |
+| `/api/export/…` | Auth | CSV/JSON download (`programmes`, `actions`, `workspace`). Account deletion is a Server Action on `/settings` using the server-only secret key (Phase 6 deviation from a separate `/api/account/delete` route). |
 
 ### 3.2 Shell and visual language
 
@@ -724,6 +724,8 @@ create policy <t>_delete on public.<t> for delete to authenticated using (owner_
 * *Upcoming deadlines* = outstanding deadlines with `today ≤ due ≤ today + 14`.
 * *Overdue tasks* = status ≠ done and `due < today`.
 * *Missing documents* = required, document-backed, unsatisfied requirements.
+
+*Implementation note (Phase 6):* the fourth figure is shown as "Unmet required requirements" (all required items not satisfied, including the self-checked academic one), and tasks tied to submitted, decided or withdrawn programmes are excluded from the overdue count and next actions.
 
 **Next-action order.** Actionable items only. Rank by: overdue before due today before upcoming; then earlier date first; then higher priority; then title. Blocked tasks are listed separately with what they wait on. Each item links to its programme or task.
 

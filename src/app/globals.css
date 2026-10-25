@@ -104,3 +104,9 @@ h3 {
     scroll-behavior: auto !important;
   }
 }
+
+/* Print (EXP-03): the adviser preview and comparison print without navigation chrome, and scroll regions show in full. */
+@media print {
+  body { background: #fff; }
+  [role="region"] { overflow: visible !important; }
+}

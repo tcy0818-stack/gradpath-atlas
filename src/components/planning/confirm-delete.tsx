@@ -3,11 +3,13 @@
 import { useRef, type ReactNode } from "react";
 
 /** Delete button that opens a native <dialog> (traps focus) saying exactly what will happen before anything is removed. */
-export function ConfirmDelete({ id, title, buttonLabel, keepLabel, action, children }: {
+export function ConfirmDelete({ id, title, buttonLabel, keepLabel, confirmLabel = "Delete permanently", action, children }: {
   id: string;
   title: string;
   buttonLabel: string;
   keepLabel: string;
+  /** Text of the button that carries out the action; defaults to "Delete permanently". */
+  confirmLabel?: string;
   action: (fd: FormData) => Promise<void>;
   children: ReactNode;
 }) {
@@ -26,7 +28,7 @@ export function ConfirmDelete({ id, title, buttonLabel, keepLabel, action, child
             {keepLabel}
           </button>
           <button type="submit" className="inline-flex min-h-11 items-center rounded-lg bg-danger px-3.5 py-2 text-sm font-semibold text-white hover:opacity-90">
-            Delete permanently
+            {confirmLabel}
           </button>
         </form>
       </dialog>

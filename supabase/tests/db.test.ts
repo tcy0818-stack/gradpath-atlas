@@ -479,6 +479,40 @@ describe("demo seed and reset (SEED-01..03)", () => {
     expect(await snapshot(C)).toEqual({ programmes: 6, requirements: 36, deadlines: 5 });
   });
 
+  it("reset with mixed manual and sample data: what survives, what cascades, and nobody else is touched (SET-02)", async () => {
+    const F = (await one<{ id: string }>(`insert into auth.users (email) values ('f@example.com') returning id`)).id;
+    await seed(F);
+    await as(F, "authenticated", () => db.query(`select public.seed_demo_planning('2026-10-25')`));
+    const bBefore = await as(B, "authenticated", async () => [await count("programmes", "true"), await count("tasks", "true"), await count("documents", "true")]);
+    await as(F, "authenticated", async () => {
+      const sampleProg = (await one<{ id: string }>(`select id from public.programmes where sample_key is not null limit 1`)).id;
+      const sampleReq = (await one<{ id: string }>(`select id from public.requirements where programme_id = $1 limit 1`, [sampleProg])).id;
+      // The shipped seed adds no documents (Phase 4 decision), so stand one in: reset treats any sample_key row the same way.
+      const sampleDoc = (await one<{ id: string }>(`insert into public.documents (title, doc_type, sample_key) values ('example doc','cv','example-doc') returning id`)).id;
+      const sampleTask = (await one<{ id: string }>(`select id from public.tasks where sample_key = 'task-draft-statement'`)).id;
+      const myDoc = (await one<{ id: string }>(`insert into public.documents (title, doc_type) values ('my cv','cv') returning id`)).id;
+      await db.query(`insert into public.requirement_documents (requirement_id, document_id) values ($1, $2)`, [sampleReq, myDoc]); // my doc on a sample requirement
+      await db.query(`insert into public.tasks (title, programme_id) values ('mine inside example', $1)`, [sampleProg]); // cascades with its programme
+      await db.query(`insert into public.tasks (title, prerequisite_task_id) values ('mine after example', $1)`, [sampleTask]); // survives, unblocked
+      const mine = await prog("my own programme");
+      const myReq = (await one<{ id: string }>(`insert into public.requirements (programme_id, requirement_type, level) values ($1, 'cv', 'required') returning id`, [mine])).id;
+      await db.query(`insert into public.requirement_documents (requirement_id, document_id) values ($1, $2)`, [myReq, sampleDoc]); // my programme on a sample doc
+
+      await db.query(`select public.reset_demo_data()`);
+
+      expect(await count("tasks", "title = 'mine inside example'")).toBe(0);
+      expect(await count("tasks", "title = 'mine after example' and prerequisite_task_id is null")).toBe(1);
+      expect(await count("documents", `id = '${myDoc}'`)).toBe(1);
+      expect(await count("requirement_documents", `document_id = '${myDoc}'`)).toBe(0); // its requirement went with the example
+      expect(await count("programmes", `id = '${mine}'`)).toBe(1);
+      expect(await count("requirements", `id = '${myReq}'`)).toBe(1);
+      expect(await count("requirement_documents", `requirement_id = '${myReq}'`)).toBe(0); // the sample document is gone
+      expect(await count("programmes", "sample_key is not null")).toBe(0);
+      expect(await count("tasks", "sample_key is not null")).toBe(0);
+    });
+    expect(await as(B, "authenticated", async () => [await count("programmes", "true"), await count("tasks", "true"), await count("documents", "true")])).toEqual(bBefore);
+  });
+
   it("anon cannot call the seed or reset functions; unauthenticated authenticated-role call is refused", async () => {
     expect(await as(null, "anon", () => code(() => db.query(`select public.seed_demo_data('2026-10-25')`)))).toBe("42501");
     expect(await as(null, "anon", () => code(() => db.query(`select public.reset_demo_data()`)))).toBe("42501");

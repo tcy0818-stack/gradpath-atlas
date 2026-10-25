@@ -9,6 +9,7 @@ import { safeNextPath } from "@/lib/auth/safe-path";
 // arbitrary query text is never rendered. Wrap each in <Suspense fallback={null}>.
 const NOTICES: Record<string, { tone: "success" | "error"; text: string }> = {
   "password-updated": { tone: "success", text: "Your password was updated. Sign in with the new password." },
+  "account-deleted": { tone: "success", text: "Your account and its data were deleted." },
   "link-invalid": { tone: "error", text: "That email link is not valid. Request a new one or sign in." },
   "link-expired": { tone: "error", text: MESSAGES.linkExpired },
   expired: { tone: "error", text: MESSAGES.linkExpired },
