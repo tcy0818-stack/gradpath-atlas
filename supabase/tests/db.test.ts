@@ -4,6 +4,9 @@ import { PGlite } from "@electric-sql/pglite";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
+import { summarise, type WorkspaceInput } from "../../src/lib/dashboard";
+import { actionsCsv, programmesCsv, workspaceJson } from "../../src/lib/export";
+import type { DocFacts } from "../../src/lib/documents/types";
 
 const dir = "supabase";
 let db: PGlite;
@@ -560,5 +563,71 @@ describe("updated_at", () => {
     await asA(() => db.query(`update public.programmes set notes = 'n' where id = $1`, [pid]));
     const r = await one<{ newer: boolean }>(`select updated_at > created_at as newer from public.programmes where id = $1`, [pid]);
     expect(r.newer).toBe(true);
+  });
+});
+
+describe("integrated student workflow (Phase 8)", () => {
+  // programme -> requirements -> reusable documents -> readiness -> tasks/deadlines -> dashboard/adviser data -> export,
+  // read back through Row Level Security as the owner, so every view is fed by the same stored rows.
+  const load = (today: string) =>
+    asA(async (): Promise<WorkspaceInput> => {
+      const programmes = (await db.query(`select * from public.programmes`)).rows as WorkspaceInput["programmes"];
+      const requirements = (await db.query(`select * from public.requirements`)).rows as WorkspaceInput["requirements"];
+      const links = (await db.query<{ requirement_id: string } & DocFacts>(
+        `select rd.requirement_id, d.id, d.title, d.doc_type, d.prep_status, d.expiry_date::text as expiry_date from public.requirement_documents rd join public.documents d on d.id = rd.document_id`,
+      )).rows;
+      const linked = new Map<string, DocFacts[]>();
+      for (const { requirement_id, ...doc } of links) linked.set(requirement_id, [...(linked.get(requirement_id) ?? []), doc]);
+      const deadlines = (await db.query(`select id, programme_id, deadline_type, title, due_date::text as due_date, is_done, sample_key from public.deadlines`)).rows as WorkspaceInput["deadlines"];
+      const tasks = (await db.query(`select id, programme_id, title, due_date::text as due_date, priority, status, prerequisite_task_id, completed_at, sample_key from public.tasks`)).rows as WorkspaceInput["tasks"];
+      return { today, programmes, requirements, linked, deadlines, tasks };
+    });
+
+  it("one set of rows gives the same readiness, counts and export values in every view, and changes follow edits", async () => {
+    const today = "2026-10-25";
+    const ids = await asA(async () => {
+      const programme = (await one<{ id: string }>(`insert into public.programmes (university_name, programme_name, tuition_state, tuition_amount, tuition_currency, status, is_shortlisted) values ('Workflow U', 'Workflow MSc', 'known', 20000, 'GBP', 'preparing', true) returning id`)).id;
+      const req = async (type: string) => (await one<{ id: string }>(`insert into public.requirements (programme_id, requirement_type, level) values ($1, $2, 'required') returning id`, [programme, type])).id;
+      const [rt, rs] = [await req("transcript"), await req("statement")];
+      await req("academic");
+      const doc = async (title: string, type: string, status: string) => (await one<{ id: string }>(`insert into public.documents (title, doc_type, prep_status) values ($1, $2, $3) returning id`, [title, type, status])).id;
+      const [dt, ds] = [await doc("Transcript", "transcript", "ready"), await doc("Statement", "statement", "draft")];
+      await db.query(`insert into public.requirement_documents (requirement_id, document_id) values ($1, $2), ($3, $4)`, [rt, dt, rs, ds]);
+      await db.query(`insert into public.deadlines (programme_id, deadline_type, title, due_date) values ($1, 'submission', 'Application deadline', '2026-11-01')`, [programme]);
+      const t1 = (await one<{ id: string }>(`insert into public.tasks (programme_id, title, due_date, priority) values ($1, 'Finish statement', '2026-10-24', 'high') returning id`, [programme])).id;
+      await db.query(`insert into public.tasks (programme_id, title, due_date, prerequisite_task_id) values ($1, 'Submit', '2026-10-30', $2)`, [programme, t1]);
+      return { programme, ds, t1 };
+    });
+
+    const before = summarise(await load(today));
+    const prog = before.programmes.find((p) => p.programme.id === ids.programme)!;
+    expect(prog.readiness.label).toBe("1 of 3 required satisfied"); // draft statement and unconfirmed academic do not count
+    // Other tests share this user, so figures are checked for this programme and as before/after differences.
+    expect(prog.unmetRequired).toBe(2);
+    expect(prog.submissionDeadline?.due).toBe("soon");
+    expect(before.blocked.map((t) => t.title)).toContain("Submit");
+    expect(before.nextActions.map((a) => a.title)).toContain("Finish statement");
+    expect(before.nextActions.map((a) => a.title)).not.toContain("Submit"); // blocked tasks are never next actions
+    expect(programmesCsv(before)).toContain("1 of 3 required satisfied");
+    expect(actionsCsv(before)).toContain("Task,Submit,Workflow MSc,2026-10-30,Due soon,Medium,Blocked,Finish statement");
+
+    await asA(async () => {
+      await db.query(`update public.documents set prep_status = 'ready' where id in (select document_id from public.requirement_documents where requirement_id in (select id from public.requirements where requirement_type = 'statement'))`);
+      await db.query(`update public.requirements set self_confirmed = true where requirement_type = 'academic'`);
+      await db.query(`update public.tasks set status = 'done' where id = $1`, [ids.t1]);
+    });
+    const after = summarise(await load(today));
+    expect(after.programmes.find((p) => p.programme.id === ids.programme)!.readiness.label).toBe("3 of 3 required satisfied");
+    expect(after.counts.unmetRequired).toBe(before.counts.unmetRequired - 2);
+    expect(after.counts.overdueTasks).toBe(before.counts.overdueTasks - 1);
+    expect(after.blocked.map((t) => t.title)).not.toContain("Submit");
+    expect(programmesCsv(after)).toContain("3 of 3 required satisfied");
+    const json = JSON.parse(workspaceJson(after, []));
+    expect(json.programmes.find((p: { programme: string }) => p.programme === "Workflow MSc").preparation.label).toBe("3 of 3 required satisfied");
+    expect(JSON.stringify(json)).not.toMatch(/owner_id/);
+
+    // the other account sees none of it, so none of it can reach its exports
+    const other = await as(B, "authenticated", async () => (await db.query(`select 1 from public.programmes where programme_name = 'Workflow MSc'`)).rows.length);
+    expect(other).toBe(0);
   });
 });

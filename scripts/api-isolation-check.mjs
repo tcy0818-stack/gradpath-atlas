@@ -145,6 +145,9 @@ try {
   // --- profiles, history, demo-data functions ------------------------------------------------------------------
   const prof = await B.client.from("profiles").select("id");
   check("B sees only B's own profile", !prof.error && prof.data.length === 1 && prof.data[0].id === B.id, code(prof));
+  // Simulated plan label (Phase 7): a profile update by B must not reach A's row. Nothing is written to A's profile.
+  const planOther = await B.client.from("profiles").update({ demo_plan: "season_pass" }).eq("id", A.id).select("id");
+  check("B cannot change A's simulated plan", !planOther.error && planOther.data.length === 0, code(planOther));
   const hist = await A.client.from("programme_status_history").insert({ owner_id: A.id, programme_id: pid, to_status: "withdrawn" });
   check("A cannot write status history", code(hist) === "42501", code(hist));
   const seed = await B.client.rpc("seed_demo_data", { p_seed_date: new Date().toISOString().slice(0, 10) });

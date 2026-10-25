@@ -3,12 +3,12 @@
 | Field | Value |
 | --- | --- |
 | Product | **GradPath Atlas** — master's application planning workspace (desktop-first web app) |
-| Document version | 0.1 — Build Phase 0 (specification only) |
+| Document version | 1.0 — updated at the end of Build Phase 8 to describe the implementation as built |
 | Date | 2026-10-25 |
 | Course / assignment | MKTG 4150 New Product Management, Team Assignment 1 (Web Application), hypothetical business "GradPath Atlas" (Brief p.3, p.11) |
-| Author | AI-assisted draft (Claude Code), to be reviewed and critically assessed by the student. Student name / ID: **[to be supplied by the student; not committed publicly]** |
-| Status | **No application code, dependencies, migrations or deployment exist yet.** Everything below is a plan. |
-| Companion files | `tasklist.md` (ordered, gated tasks), `CLAUDE.md` (agent rules), `README.md` (setup and submission checklist) |
+| Author | AI-assisted draft (Claude Code), to be reviewed and critically assessed by the student.|
+| Status | **Built through Phase 8 and locally verified; not yet deployed.** The sections below were written as a plan and have been updated where the build differs (see "As built" notes and §7.8). Requirements marked unverified in `TESTING.md` remain unverified. |
+| Companion files | `tasklist.md` (ordered, gated tasks), `README.md` (setup, deployment and submission checklist), `TESTING.md` (test checklist and evidence), `CLAUDE.md` (agent working rules; not part of the submission) |
 
 ---
 
@@ -427,7 +427,7 @@ Purpose: replace assumptions with evidence (L2 pp.35, 38; L6 p.88). Evidence str
 
 Bias and ethics notes [Dec]: record sampling (friends and classmates bias results — L2 p.53 asks that sampling bias be disclosed); get verbal consent; use fictional data so no participant shares personal information; never present these as results until performed.
 
-**Observed results: none yet. [Pend]**
+**Observed results: none. [Pend]** (This validation plan was not carried out; no interviews, surveys or price tests exist.)
 
 ---
 
@@ -437,7 +437,7 @@ Bias and ethics notes [Dec]: record sampling (friends and classmates bias result
 
 | Route | Auth | Purpose |
 | --- | --- | --- |
-| `/` | Public | Landing: problem, benefits, app screenshot, CTA. |
+| `/` | Public | Landing: problem, benefits, labelled illustrative preview, CTA. |
 | `/pricing` | Public | Three tiers; simulated upgrade/enquiry. |
 | `/privacy` | Public | Concise privacy notice (PICS) and cookie statement. |
 | `/signup`, `/login` | Public | Account creation (with privacy notice) and sign-in. |
@@ -517,7 +517,7 @@ Everything else (UI kits, state libraries, charting, date libraries, ORM, paymen
 Browser ──(HTTPS)──> Next.js on Vercel
    │                    ├─ Server Components / Server Actions  ── user-scoped Supabase client (publishable key + user's cookie session)
    │                    ├─ Route Handlers (export, callback)    ── same, RLS applies
-   │                    └─ /api/account/delete  ── secret-key client (server-only env var, used here only)
+   │                    └─ deleteAccountAction (Server Action on /settings)  ── secret-key client (server-only env var, used here only)
    └─ never sees the secret key
                          Supabase: Auth (users, sessions) · PostgreSQL (RLS on every table)
 ```
@@ -758,7 +758,7 @@ Documents include a ready transcript, ready CV, draft statement, a ready-but-**e
 | --- | --- | --- |
 | Supabase Auth | Email/password sign-up, verification, sign-in, sign-out, reset | Browser/server calls with the publishable key and the user session. |
 | Supabase PostgreSQL | All data, RLS | User-scoped queries via the SSR client. |
-| Supabase Admin API | **Only** `auth.admin.deleteUser` in `/api/account/delete`, after verifying the caller's session | Service-role key, server only. |
+| Supabase Admin API | **Only** `auth.admin.deleteUser` in `src/lib/supabase/admin.ts`, called from the account-deletion Server Action after verifying the caller's session | Service-role key, server only. |
 | Vercel | Hosting, env vars, preview/production deployments | Manual by the student. |
 
 ### 6.2 Environment variables (names only; no values in the repository)
@@ -855,29 +855,31 @@ Only strictly necessary authentication/session cookies are set; no analytics or 
 
 ### 7.7 Honest limits
 
-This PRD is a specification. No requirement has been verified. Personas, prices, thresholds and the 14-day window are assumptions. No competitor research, interviews or market-size data exist. Real-world programme data is out of scope and the product predicts nothing about admissions. Accessibility and security claims will be limited to checks actually performed.
+**As built (end of Phase 8).** The application implements the MVP scope in §2.2. Known differences from the original plan: (1) the landing page shows an inert, labelled *illustrative preview* made from the app's own comparison component and invented example data, not a screenshot (a screenshot needs a signed-in session); (2) documents are metadata only (DOC-05); (3) the adviser view is a read-only preview of the student's own workspace, not shared access (ADV-01); (4) pricing is hypothetical, tier limits are not enforced and the upgrade only stores a plan label (PUB-02/03); the licence tier is never stored; (5) removing the fictional examples also removes tasks, deadlines and requirements attached to an example programme, including ones the user added; standalone records are kept (SET-02); (6) account deletion is a Server Action using the server-only secret key, not a separate API route; (7) the dashboard's fourth figure counts all unmet required requirements, not only documents.
+
+**What is not established.** Personas, prices, thresholds and the 14-day window are assumptions. No competitor research, interviews or market-size data exist, so the validation plan in §2.6 has produced no results. Real-world programme data is out of scope and the product predicts nothing about admissions. Sign-up and password-reset email delivery to people outside the Supabase project team is **not** established (the built-in sender is restricted), nor is the live deployment. Accessibility and security statements are limited to the checks listed in `TESTING.md`; neither full WCAG conformance nor legal compliance is claimed. Evidence is labelled automated, agent-observed or student-reported; the agent never signed in to the hosted project.
 
 ### 7.8 Requirement traceability (assignment feature → requirement → planned module → tasks → evidence)
 
-"Evidence" is **Pending** for everything except Phase 0 documents; it is filled in when each task's gate passes (see `tasklist.md`).
+"Evidence" cites the task gates in `tasklist.md` and the categories in `TESTING.md`: **A** = automated tests/build, **O** = agent-observed, **S** = student-reported on the hosted project. A dash means not verified.
 
-| Assignment feature (Brief page) | Req IDs | Planned route / module | Task IDs | Verification evidence |
+| Assignment feature (Brief page) | Req IDs | Implemented route / module | Task IDs | Verification evidence |
 | --- | --- | --- | --- | --- |
-| Sign-up, sign-in, password reset (p.28) | AUTH-01…06 | `/signup` `/login` `/forgot-password` `/reset-password` `/auth/callback`, `src/lib/supabase/*` | M3.01–M3.10, M3.12 | Pending (Phase 2) |
-| Personal dashboard (p.28–29) | DSH-01…04 | `/dashboard`, `src/lib/dashboard.ts`, `next-actions.ts` | M5.23, M5.24 | Pending (Phase 6) |
-| Programme comparison table (p.28–29) | CMP-01…05, PRG-03 | `/programmes`, `/compare`, `src/lib/compare.ts` | M5.02, M5.08 | Pending (Phase 3) |
-| Programme CRUD, detail, notes, status (p.28–29) | PRG-01…07, REQ-01/02 | `/programmes/[id]`, server actions | M5.01, M5.03–M5.07 | Pending (Phase 3) |
-| Deadline tracker (p.28–29) | DL-01…05 | `/deadlines`, `src/lib/dates.ts`, `src/lib/deadlines.ts` | M5.16–M5.18 | Built in Phase 5; date and grouping logic unit-tested; browser checks pending |
-| Document tracker, reusable links (p.28–29, p.11) | DOC-01…05, RDY-01/02 | `/documents`, `src/lib/readiness.ts` | M5.11–M5.15 | Built in Phase 4; unit-tested; browser checks pending (M5.12–M5.15) |
-| Task list, prerequisites, progress (p.28, p.11) | TSK-01…05 | `/tasks`, `src/lib/tasks.ts` | M5.19, M5.20, M5.22 | Pending (Phase 5) |
-| Search, filters, sorting (p.28) | CMP-03, TSK-02, DL-02 | list pages | M5.02, M5.20, M5.17 | Pending (Phases 3, 5) |
-| Optional adviser review view (p.28–29) | ADV-01 | `/adviser` | M5.25 | Pending (Phase 6) |
-| Exportable summary (p.28) | EXP-01…03, SEC-06/07 | `/api/export/*`, `src/lib/csv.ts` | M4.03–M4.05, M4.07 | Pending (Phase 6) |
-| Fictional demo data (p.28–29) | SEED-01…04, SET-02 | SQL functions + settings action | M2.09, M2.13, M5.09, M5.21, M5.27 | Pending (Phases 1, 3, 5, 6) |
-| Settings, deletion, privacy (p.29, p.33) | SET-01…03, SEC-05, PUB-05/06 | `/settings`, `/privacy`, `/api/account/delete` | M4.06, M5.26, M6.06 | Pending (Phases 6–7) |
-| Landing, pricing, test upgrade only (p.29) | PUB-01…04 | `/`, `/pricing` | M6.02–M6.05 | Pending (Phase 7) |
-| Security: ownership, RLS, secrets (p.33, p.43) | SEC-01…04 | `supabase/migrations/*`, `src/lib/env.ts` | M1.14, M2.01–M2.12, M4.08 | Pending (Phase 1+) |
-| Accessible, responsive, desktop-first (p.29, p.34–35) | UX-01…04 | all routes | M3.09, M6.01, M6.07–M6.09 | Pending (Phase 7) |
-| PRD.md (25%) and tasklist.md (25%) (p.4) | PRC-01, SUB-01 | `PRD.md`, `tasklist.md` | M1.04, M1.05, M1.08 | PRD and tasklist created and audited in Phase 0 (this document) |
-| Repository (25%) and live site (25%) (p.4) | DEP-01, SUB-01 | Git repo, Vercel | M6.14–M6.17 | Pending — student handles manually |
-| Student testing checklist, later improvements (p.29) | — | `TESTING.md`, §2.4 | M6.10, M6.13 | Pending (Phase 8) |
+| Sign-up, sign-in, password reset (p.28) | AUTH-01…06 | `/signup` `/login` `/forgot-password` `/reset-password` `/auth/callback`, `src/lib/supabase/*` | M3.01–M3.12 | A: schema, redirect-guard and error-map tests; O: signed-out redirects and callback failure paths. S: signed-in use throughout later checks. **Not verified:** confirmation and reset emails end to end, generic login-failure text, sign-out + Back |
+| Personal dashboard (p.28–29) | DSH-01…04 | `/dashboard`, `src/lib/dashboard.ts`, `next-actions.ts` | M5.23, M5.24 | A: counts/order tests; S: Phase 6 checks 1–3 |
+| Programme comparison table (p.28–29) | CMP-01…05, PRG-03 | `/programmes`, `/compare`, `src/lib/programmes/compare.ts` | M5.02, M5.08 | A: compare/list tests; S: Phase 3 checks |
+| Programme CRUD, detail, notes, status (p.28–29) | PRG-01…07, REQ-01/02 | `/programmes/[id]`, `src/lib/programmes/*` | M5.01, M5.03–M5.07 | A: schema tests, PGlite constraints; S: Phase 3 checks 3–8, 14 |
+| Deadline tracker (p.28–29) | DL-01…05 | `/deadlines`, `src/lib/dates.ts`, `deadlines.ts` | M5.16–M5.18 | A: date/grouping tests; S: Phase 5 checks |
+| Document tracker, reusable links (p.28–29, p.11) | DOC-01…05, RDY-01/02 | `/documents`, `src/lib/readiness.ts` | M5.11–M5.15 | A: readiness tests, integrated workflow test; S: Phase 4 checks |
+| Task list, prerequisites, progress (p.28, p.11) | TSK-01…05 | `/tasks`, `src/lib/tasks.ts` | M5.19, M5.20, M5.22 | A: task tests, DB cycle/blocked tests; S: Phase 5 checks |
+| Search, filters, sorting (p.28) | CMP-03, TSK-02, DL-02 | list pages | M5.02, M5.20, M5.17 | A: filter/sort tests; S: Phases 3 and 5 |
+| Optional adviser review view (p.28–29) | ADV-01 | `/adviser` | M5.25 | S: Phase 6 check 4; O: fixture render |
+| Exportable summary (p.28) | EXP-01…03, SEC-06/07 | `/api/export/*`, `src/lib/csv.ts`, `export.ts` | M4.03–M4.05, M4.07 | A: CSV/export tests; O: signed-out requests redirect; S: Phase 6 checks 5–6. **Not verified:** Compare print preview |
+| Fictional demo data (p.28–29) | SEED-01…04, SET-02 | SQL functions + Settings action | M2.09, M2.13, M5.09, M5.21, M5.27 | A: PGlite seed/reset tests incl. mixed manual/sample; S: hosted scripts, Phase 3/5/6 checks |
+| Settings, deletion, privacy (p.29, p.33) | SET-01…03, SEC-05, PUB-05/06 | `/settings`, `/privacy`, `deleteAccountAction` | M4.06, M5.26, M6.06 | A: deletion-rule tests (fakes); S: Phase 6 checks 7–10 incl. real deletion of a disposable account |
+| Landing, pricing, test upgrade only (p.29) | PUB-01…04 | `/`, `/pricing` | M6.02–M6.05 | O: browser checks of public pages; A: plan DB test; S: Phase 7 checks |
+| Security: ownership, RLS, secrets (p.33, p.43) | SEC-01…07 | `supabase/migrations/*`, `src/lib/env.ts`, `src/lib/supabase/admin.ts` | M1.14, M2.01–M2.15, M3.11, M4.08 | A: PGlite RLS/forged-link/cascade tests, bundle scan; S: `rls_coverage.sql`, `hosted_authz_check.sql`, `check:api-isolation`. Final-schema re-run pending (M6.11) |
+| Accessible, responsive, desktop-first (p.29, p.34–35) | UX-01…04 | all routes | M3.09, M6.01, M6.07–M6.09 | O: label/landmark/overflow checks on public pages; computed contrast; S: Phase 7 check 7–8. No WCAG conformance claim |
+| PRD.md (25%) and tasklist.md (25%) (p.4) | PRC-01, SUB-01 | `PRD.md`, `tasklist.md` | M1.04, M1.05, M1.08, M6.10, M6.13 | Audited in Phase 0 and again in Phase 8 |
+| Repository (25%) and live site (25%) (p.4) | DEP-01, SUB-01 | Git repo, Vercel | M6.14–M6.17 | Repository exists locally with a GitHub remote. **Live site: not deployed; student handles manually** |
+| Student testing checklist, later improvements (p.29) | — | `TESTING.md`, §2.4 | M6.10, M6.13 | `TESTING.md` written in Phase 8 |
