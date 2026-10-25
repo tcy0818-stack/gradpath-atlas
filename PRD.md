@@ -364,7 +364,7 @@ Every criterion is written to be checkable. "Gate" names the verification type u
 
 | ID | Requirement | Acceptance criteria | Brief |
 | --- | --- | --- | --- |
-| PUB-01 | Landing page. | Problem, benefits, a real screenshot of the app, and a start-planning CTA; hero headline and CTA visible within a 375×667 viewport; no invented testimonials, adoption figures or partner logos. | p.29, p.43 |
+| PUB-01 | Landing page. | Problem, benefits, an interface preview, and a start-planning CTA; hero headline and CTA visible within a 375×667 viewport; no invented testimonials, adoption figures or partner logos. | p.29, p.43 |
 | PUB-02 | Pricing page. | Shows the three tiers in §1.6 with exact price, currency, duration and feature differences, labelled hypothetical. | p.29 |
 | PUB-03 | Simulated upgrade. | Choosing a paid tier shows a confirmation labelled "Simulation — no payment taken" and stores only a demo plan label; no card fields exist. | p.29 |
 | PUB-04 | Simulated enquiry. | The licence tier opens a labelled modal that collects no personal data and sends nothing. | — |
@@ -468,7 +468,7 @@ Bias and ethics notes [Dec]: record sampling (friends and classmates bias result
 
 | Page | Key components | Empty / loading / error states |
 | --- | --- | --- |
-| Landing | Hero with one-sentence value proposition and "Start planning" CTA (above the 667px fold at 375px, Brief p.33); three benefits; real app screenshot with alt text; link to pricing/privacy. | Static page; image has text alt. |
+| Landing | Hero with one-sentence value proposition and "Start planning" CTA (above the 667px fold at 375px, Brief p.33); four benefits; an inert interface preview built from the app's own comparison component and invented example data (not a screenshot of any account), labelled as illustrative and described in a figure label; link to pricing/privacy. | Static page; image has text alt. |
 | Pricing | Three equal-weight cards, exact prices and durations, "Hypothetical — nothing is charged" banner; upgrade buttons open a confirmation dialog; licence "Enquire" opens a labelled simulation modal. | Signed-out users are sent to sign up before simulating an upgrade. |
 | Sign-up / login / reset | Labelled fields, inline errors tied to inputs, privacy notice next to sign-up, generic outcome messages. | Disabled submit while sending; recoverable error text. |
 | Dashboard | Four count cards (definitions in §5.5), "Next actions" list, programme table with **Status** and **Preparation** as separate columns. | No data → "Add a programme" and "Load fictional examples". Loading skeleton; error panel with retry. |

@@ -27,6 +27,6 @@ export async function requireUser(): Promise<SessionUser> {
 export const getProfile = cache(async () => {
   const user = await requireUser();
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("display_name, time_zone").eq("id", user.id).maybeSingle();
-  return { displayName: (data?.display_name as string | null) ?? null, timeZone: (data?.time_zone as string | null) ?? "UTC" };
+  const { data } = await supabase.from("profiles").select("display_name, time_zone, demo_plan").eq("id", user.id).maybeSingle();
+  return { displayName: (data?.display_name as string | null) ?? null, timeZone: (data?.time_zone as string | null) ?? "UTC", demoPlan: ((data?.demo_plan as string | null) ?? "free") as "free" | "season_pass" | "licence_enquiry" };
 });

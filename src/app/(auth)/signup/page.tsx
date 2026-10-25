@@ -25,7 +25,8 @@ export default function SignUpPage() {
         <p className="mt-1">
           Your email address and the planning details you enter, only to run this planner. There is no advertising or
           analytics tracking; the only cookies keep you signed in. This is a coursework prototype, so please don&apos;t
-          enter sensitive personal data. Self-service export and account deletion are not available yet.
+          enter sensitive personal data. You can export your data and delete your account from Settings.
+          Read the <Link href="/privacy" className={textLink}>privacy and cookie notice</Link>.
         </p>
       </section>
       <p className="mt-4 flex min-h-11 flex-wrap items-center gap-x-1.5 text-sm text-ink-2">

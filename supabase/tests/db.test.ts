@@ -319,6 +319,20 @@ describe("profiles", () => {
   });
 });
 
+describe("simulated plan (PUB-03)", () => {
+  it("stores only the plan label and time on the caller's own profile; others and anon cannot change it", async () => {
+    await asA(() => db.query(`update public.profiles set demo_plan='season_pass', demo_plan_selected_at=now() where id=$1`, [A]));
+    const own = await one<{ demo_plan: string; chosen: boolean }>(`select demo_plan, demo_plan_selected_at is not null as chosen from public.profiles where id=$1`, [A]);
+    expect(own).toEqual({ demo_plan: "season_pass", chosen: true });
+    await asA(() => db.query(`update public.profiles set demo_plan='free', demo_plan_selected_at=null where id=$1`, [A]));
+    expect((await one<{ demo_plan: string }>(`select demo_plan from public.profiles where id=$1`, [A])).demo_plan).toBe("free");
+    const other = await as(B, "authenticated", () => db.query(`update public.profiles set demo_plan='season_pass' where id=$1 returning id`, [A]));
+    expect(other.rows).toHaveLength(0);
+    expect(await as(null, "anon", () => code(() => db.query(`update public.profiles set demo_plan='season_pass' where id=$1`, [A])))).toBe("42501");
+    expect((await one<{ demo_plan: string }>(`select demo_plan from public.profiles where id=$1`, [A])).demo_plan).toBe("free");
+  });
+});
+
 describe("cascade rules", () => {
   it("deleting a programme removes its children and links but keeps reusable documents used elsewhere", async () => {
     await asA(async () => {

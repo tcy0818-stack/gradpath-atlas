@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DeleteAccount } from "@/components/account/delete-account";
 import { ProfileForm } from "@/components/account/profile-form";
 import { ConfirmDelete } from "@/components/planning/confirm-delete";
 import { LoadExamples } from "@/components/programmes/load-examples";
-import { Alert, quietButton } from "@/components/ui";
+import { Alert, quietButton, textLink } from "@/components/ui";
 import { resetExamplesAction } from "@/lib/account/actions";
 import { getResetImpact } from "@/lib/account/queries";
 import { getProfile, requireUser } from "@/lib/auth/dal";
+import { PLAN_LABELS } from "@/lib/plans/plans";
 import { signOutAction } from "@/lib/auth/actions";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -37,6 +39,9 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
       <section aria-labelledby="profile-h" className="mt-6">
         <h2 id="profile-h" className="text-lg font-semibold">Profile</h2>
         <p className="mt-1 text-sm text-ink-2">Signed in as <span className="font-medium">{user.email ?? "your account"}</span>. Your time zone decides what &ldquo;today&rdquo; is for deadlines and overdue tasks.</p>
+        <p className="mt-2 text-sm text-ink-2">
+          Plan (simulation only, nothing is charged): <span className="font-medium">{PLAN_LABELS[profile.demoPlan]}</span>. <Link href="/pricing" className={textLink}>See pricing</Link>.
+        </p>
         <div className="mt-4 max-w-md">
           <ProfileForm displayName={profile.displayName} timeZone={profile.timeZone} zones={zones} />
         </div>
@@ -44,7 +49,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
 
       <section aria-labelledby="export-h" className={section}>
         <h2 id="export-h" className="text-lg font-semibold">Export your data</h2>
-        <p className="mt-1 max-w-[65ch] text-sm text-ink-2">Downloads contain only your own records: no passwords or sign-in details. Unknown values are written as words, never 0.</p>
+        <p className="mt-1 max-w-[65ch] text-sm text-ink-2">Downloads contain only your own records: no passwords or sign-in details. Unknown values are written as words, never 0. <Link href="/privacy" className={textLink}>Privacy and cookies</Link>.</p>
         <ul className="mt-3 flex flex-wrap gap-3">
           <li><a className={quietButton} href="/api/export/programmes" download>Programme summary (CSV)</a></li>
           <li><a className={quietButton} href="/api/export/actions" download>Action plan (CSV)</a></li>
