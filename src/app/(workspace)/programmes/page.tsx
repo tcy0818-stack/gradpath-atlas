@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
 import { LoadExamples } from "@/components/programmes/load-examples";
 import { ProgrammeList } from "@/components/programmes/programme-list";
 import { Alert, primaryButton } from "@/components/ui";
@@ -24,20 +25,21 @@ export default async function ProgrammesPage({ searchParams }: PageProps<"/progr
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Programmes</h1>
-        <div className="flex flex-wrap items-center gap-3">
+      <PageHeader
+        title="Programmes"
+        lede="Every programme you are considering. Tick a few to compare them, or shortlist the ones you are serious about."
+        actions={<>
           {all.length > 0 && <LoadExamples />}
           <Link href="/programmes/new" className={`${primaryButton} !w-auto`}>Add programme</Link>
-        </div>
-      </div>
+        </>}
+      />
 
       {notice && <div className="mt-4"><Alert tone={notice.tone}>{notice.text}</Alert></div>}
 
-      <div className="mt-6">
+      <div className="mt-8">
         {all.length === 0 ? (
-          <section aria-labelledby="empty-heading" className="rounded-lg border border-line bg-surface p-6">
-            <h2 id="empty-heading" className="text-lg font-semibold">No programmes yet</h2>
+          <section aria-labelledby="empty-heading" className="rounded-xl border border-line bg-surface p-6 shadow-panel sm:p-8">
+            <h2 id="empty-heading" className="text-2xl">No programmes yet</h2>
             <p className="mt-2 max-w-[65ch] text-ink-2">
               Add the master&apos;s programmes you are considering, or load a set of fictional examples to see how comparison works. The examples are invented and labelled, and you can remove them later.
             </p>

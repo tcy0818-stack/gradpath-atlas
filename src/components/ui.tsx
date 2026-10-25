@@ -6,6 +6,9 @@ export const primaryButton =
 export const quietButton =
   "inline-flex min-h-11 items-center justify-center rounded-lg border border-control bg-surface px-3.5 py-2 text-sm font-semibold text-ink " +
   "transition-colors hover:bg-accent-tint";
+// Light button for use on navy bands (the teal primary has too little edge contrast against navy).
+export const lightButton =
+  "inline-flex min-h-11 items-center justify-center rounded-lg bg-surface px-4 py-2.5 text-base font-semibold text-ink transition-colors hover:bg-accent-tint";
 export const textLink = "font-medium text-accent underline underline-offset-4 hover:text-accent-strong"; // links inside a sentence
 // A link standing on its own line gets a real 44px target (no overlap with the next one).
 export const standaloneLink = `inline-flex min-h-11 items-center ${textLink}`;

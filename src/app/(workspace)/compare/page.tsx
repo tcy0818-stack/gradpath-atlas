@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
 import { CompareMatrix } from "@/components/programmes/compare-matrix";
 import { Alert, quietButton, textLink } from "@/components/ui";
 import { buildMatrix } from "@/lib/programmes/compare";
@@ -23,10 +24,10 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Compare programmes</h1>
-      <p className="mt-2 max-w-[65ch] text-ink-2">
-        {requested.length ? "Comparing the programmes you chose." : "Comparing your shortlist."} <strong>Unknown</strong> means not yet known; <strong>Not recorded</strong> means no requirement was entered. Tuition in different currencies is shown as entered and never converted.
-      </p>
+      <PageHeader
+        title="Compare programmes"
+        lede={<>{requested.length ? "Comparing the programmes you chose." : "Comparing your shortlist."} <strong>Unknown</strong> means not yet known; <strong>Not recorded</strong> means no requirement was entered. Tuition in different currencies is shown as entered and never converted.</>}
+      />
 
       {tooMany && <div className="mt-4"><Alert tone="info">Only the first {MAX} programmes are shown.</Alert></div>}
 
@@ -36,7 +37,7 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
         </p>
       ) : (
         <>
-          <details open={columns.length < 2} className="mt-6 rounded-lg border border-line bg-surface">
+          <details open={columns.length < 2} className="mt-8 rounded-xl border border-line bg-surface shadow-panel">
             <summary className="flex min-h-11 cursor-pointer items-center px-4 font-semibold">Choose programmes to compare</summary>
             <form method="get" action="/compare" className="border-t border-line p-4">
               <fieldset>
@@ -56,10 +57,10 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
             </form>
           </details>
 
-          <div className="mt-6">
+          <div className="mt-8">
             {columns.length < 2 ? (
-              <div className="rounded-lg border border-dashed border-control p-6">
-                <p className="font-semibold">Choose at least two programmes.</p>
+              <div className="rounded-xl border border-dashed border-control p-6">
+                <p className="font-display text-xl font-semibold">Choose at least two programmes.</p>
                 <p className="mt-1 text-ink-2">Tick programmes above, or shortlist some on the <Link href="/programmes" className={textLink}>Programmes page</Link>.</p>
               </div>
             ) : (

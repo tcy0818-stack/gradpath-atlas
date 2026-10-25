@@ -35,7 +35,7 @@ export default function PrivacyPage() {
         <li><strong>Supabase</strong> stores the database, handles sign-in and sends the confirmation and password-reset emails. Your data is only readable by your own account: every table is restricted to its owner.</li>
         <li><strong>Vercel</strong> hosts the web app.</li>
       </ul>
-      <p className={p}>No other third party receives your data. Fonts are served from your device, so no font provider is contacted. Supabase&apos;s own backup, log and location practices are outside this app and have not been reviewed here.</p>
+      <p className={p}>No other third party receives your data. Fonts are served from this site itself (heading font) and your own device (body text), so your browser never contacts a font provider. Supabase&apos;s own backup, log and location practices are outside this app and have not been reviewed here.</p>
 
       <h2 className={h2}>Your data, your control</h2>
       <ul className={ul}>

@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Create your account" };
 export default function SignUpPage() {
   return (
     <>
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Create your account</h1>
+      <h1 className="mb-6 text-3xl">Create your account</h1>
       <AuthForm
         action={signUpAction}
         submitLabel="Create account"

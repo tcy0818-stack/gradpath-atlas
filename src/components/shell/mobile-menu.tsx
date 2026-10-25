@@ -39,7 +39,7 @@ export function MobileMenu() {
       <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-lg px-3 text-sm font-semibold text-rail-ink hover:bg-rail-hover">
         Menu
       </summary>
-      <div className="absolute right-0 z-20 mt-1 w-64 rounded-lg border border-rail-line bg-rail p-2 shadow-lg shadow-black/25">
+      <div className="absolute right-0 z-20 mt-1 max-h-[80dvh] w-64 overflow-y-auto rounded-lg border border-rail-line bg-rail p-3 shadow-lg shadow-black/25">
         <Nav />
       </div>
     </details>

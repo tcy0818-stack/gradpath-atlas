@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DeleteAccount } from "@/components/account/delete-account";
+import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "@/components/account/profile-form";
 import { ConfirmDelete } from "@/components/planning/confirm-delete";
 import { LoadExamples } from "@/components/programmes/load-examples";
@@ -33,11 +34,11 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-      {notice && <div className="mt-4"><Alert tone={notice.tone}>{notice.text}</Alert></div>}
+      <PageHeader title="Settings" lede="Your profile, your data and your account." />
+      {notice && <div className="mt-5"><Alert tone={notice.tone}>{notice.text}</Alert></div>}
 
-      <section aria-labelledby="profile-h" className="mt-6">
-        <h2 id="profile-h" className="text-lg font-semibold">Profile</h2>
+      <section aria-labelledby="profile-h" className="mt-8">
+        <h2 id="profile-h" className="text-2xl">Profile</h2>
         <p className="mt-1 text-sm text-ink-2">Signed in as <span className="font-medium">{user.email ?? "your account"}</span>. Your time zone decides what &ldquo;today&rdquo; is for deadlines and overdue tasks.</p>
         <p className="mt-2 text-sm text-ink-2">
           Plan (simulation only, nothing is charged): <span className="font-medium">{PLAN_LABELS[profile.demoPlan]}</span>. <Link href="/pricing" className={textLink}>See pricing</Link>.
@@ -48,7 +49,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
       </section>
 
       <section aria-labelledby="export-h" className={section}>
-        <h2 id="export-h" className="text-lg font-semibold">Export your data</h2>
+        <h2 id="export-h" className="text-2xl">Export your data</h2>
         <p className="mt-1 max-w-[65ch] text-sm text-ink-2">Downloads contain only your own records: no passwords or sign-in details. Unknown values are written as words, never 0. <Link href="/privacy" className={textLink}>Privacy and cookies</Link>.</p>
         <ul className="mt-3 flex flex-wrap gap-3">
           <li><a className={quietButton} href="/api/export/programmes" download>Programme summary (CSV)</a></li>
@@ -58,7 +59,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
       </section>
 
       <section aria-labelledby="examples-h" className={section}>
-        <h2 id="examples-h" className="text-lg font-semibold">Fictional examples</h2>
+        <h2 id="examples-h" className="text-2xl">Fictional examples</h2>
         <p className="mt-1 max-w-[65ch] text-sm text-ink-2">
           {hasExamples
             ? `You currently have ${plural(impact.programmes, "example programme")}, ${plural(impact.documents, "example document")}, ${plural(impact.tasks, "task")} and ${plural(impact.deadlines, "deadline")} that belong to the fictional examples.`
@@ -81,12 +82,12 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
       </section>
 
       <section aria-labelledby="session-h" className={section}>
-        <h2 id="session-h" className="text-lg font-semibold">Session</h2>
+        <h2 id="session-h" className="text-2xl">Session</h2>
         <form action={signOutAction} className="mt-3"><button type="submit" className={quietButton}>Sign out</button></form>
       </section>
 
       <section aria-labelledby="delete-h" className={section}>
-        <h2 id="delete-h" className="text-lg font-semibold">Delete account</h2>
+        <h2 id="delete-h" className="text-2xl">Delete account</h2>
         <p className="mt-1 max-w-[65ch] text-sm text-ink-2">Permanently removes your sign-in and all of your records. Export first if you want a copy.</p>
         <div className="mt-3"><DeleteAccount /></div>
       </section>

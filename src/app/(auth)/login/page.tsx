@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Sign in" };
 export default function LoginPage() {
   return (
     <>
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Sign in</h1>
+      <h1 className="mb-6 text-3xl">Sign in</h1>
       <Suspense fallback={null}>
         <div className="mb-5 empty:hidden">
           <UrlNotice />

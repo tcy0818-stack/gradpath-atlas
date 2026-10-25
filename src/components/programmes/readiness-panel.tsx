@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ActionForm } from "@/components/action-form";
+import { ReadinessMeter } from "./readiness-meter";
 import { DocBadges } from "@/components/documents/doc-badges";
 import { Field, StatusIcon, standaloneLink } from "@/components/ui";
 import { linkDocumentAction, unlinkDocumentAction } from "@/lib/documents/actions";
@@ -33,7 +34,7 @@ function Item({ item, documents, today }: { item: ReqReadiness; documents: DocFa
   const counts = r.level === "required" || r.level === "optional";
 
   return (
-    <li className="rounded-lg border border-line bg-surface p-4">
+    <li className="p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-semibold">{label} <span className="font-normal text-ink-2">· {LEVEL_LABELS[r.level]}{r.detail ? ` · ${r.detail}` : ""}</span></h3>
         <StateLabel state={item.state} />
@@ -112,8 +113,8 @@ export function ReadinessPanel({ readiness, documents, today }: { readiness: Rea
   const missing = readiness.items.filter((i) => i.missing);
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-line bg-info-tint p-4">
-        <p className="text-lg font-semibold" aria-live="polite">{readiness.label}</p>
+      <div className="rounded-xl border border-line bg-info-tint p-4 sm:p-5">
+        <div aria-live="polite"><ReadinessMeter readiness={readiness} size="lg" /></div>
         <p className="mt-1 max-w-[65ch] text-sm text-ink-2">
           Readiness is calculated from your requirements and linked documents. A document counts only when it is the right type, marked Ready and not past its expiry date. Optional, not applicable and unknown requirements are not counted.
           {readiness.unknown > 0 && ` ${readiness.unknown} ${readiness.unknown === 1 ? "requirement needs" : "requirements need"} checking.`}
@@ -130,7 +131,7 @@ export function ReadinessPanel({ readiness, documents, today }: { readiness: Rea
               <ul className="mt-1 list-disc space-y-0.5 pl-5 text-sm text-ink-2">{missing.map((i) => <li key={i.requirement.id}>{i.missing}</li>)}</ul>
             </div>
           )}
-          <ul className="space-y-3">{readiness.items.map((i) => <Item key={i.requirement.id} item={i} documents={documents} today={today} />)}</ul>
+          <ul className="divide-y divide-line rounded-xl border border-line bg-surface shadow-panel">{readiness.items.map((i) => <Item key={i.requirement.id} item={i} documents={documents} today={today} />)}</ul>
         </>
       )}
     </div>

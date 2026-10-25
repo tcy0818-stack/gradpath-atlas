@@ -11,7 +11,10 @@ async function AccountBar() {
   const profile = await getProfile();
   return (
     <div className="flex min-w-0 items-center justify-end gap-3">
-      <p className="min-w-0 truncate text-sm text-ink-2" title={user.email ?? undefined}>
+      <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-rail font-display text-sm font-semibold text-rail-ink">
+        {(profile.displayName ?? user.email ?? "?").trim().charAt(0).toUpperCase()}
+      </span>
+      <p className="min-w-0 truncate text-sm font-medium text-ink-2" title={user.email ?? undefined}>
         <span className="sr-only">Signed in as </span>
         {profile.displayName ?? user.email}
       </p>

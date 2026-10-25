@@ -1,10 +1,14 @@
+import { Icon, type IconName } from "@/components/icons";
 import { STATUS_LABELS, type Status } from "@/lib/programmes/types";
 
-/** Status as text on a bordered pill (never colour alone). Submitted and decided applications read as settled. */
+const STATUS_ICON: Record<Status, IconName> = { researching: "circle", preparing: "clock", submitted: "check", decision_received: "arrow", withdrawn: "dash" };
+
+/** Status as icon plus text on a bordered pill (never colour alone). Submitted and decided applications read as settled. */
 export function StatusBadge({ status }: { status: Status }) {
   const settled = status === "submitted" || status === "decision_received" || status === "withdrawn";
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${settled ? "border-line bg-bg text-ink-2" : "border-accent bg-accent-tint text-accent-strong"}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${settled ? "border-line bg-surface text-ink-2" : "border-accent bg-accent-tint text-accent-strong"}`}>
+      <Icon name={STATUS_ICON[status]} size={13} />
       {STATUS_LABELS[status]}
     </span>
   );

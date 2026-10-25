@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DueLabel, Pill } from "@/components/planning/due-label";
+import { Icon } from "@/components/icons";
+import { PageHeader } from "@/components/page-header";
 import { Alert, primaryButton, quietButton, standaloneLink } from "@/components/ui";
 import { DUE_SOON_DAYS } from "@/lib/dates";
 import { DEADLINE_TYPE_LABELS, decorateDeadlines, groupDeadlines, type DeadlineView } from "@/lib/deadlines";
@@ -45,15 +47,15 @@ function Row({ d }: { d: DeadlineView }) {
   );
 }
 
-function Group({ id, title, hint, items }: { id: string; title: string; hint?: string; items: DeadlineView[] }) {
+function Group({ id, title, hint, items, icon }: { id: string; title: string; hint?: string; items: DeadlineView[]; icon?: "alert" }) {
   return (
     <section aria-labelledby={id}>
-      <h2 id={id} className="text-lg font-semibold">{title} <span className="font-normal text-ink-2">({items.length})</span></h2>
+      <h2 id={id} className="flex items-center gap-2 text-2xl">{icon && items.length > 0 && <Icon name={icon} size={22} className="text-danger" />}{title} <span className="font-sans text-base font-normal text-ink-2">({items.length})</span></h2>
       {hint && <p className="mt-0.5 text-sm text-ink-2">{hint}</p>}
       {items.length === 0 ? (
         <p className="mt-2 rounded-lg border border-dashed border-control p-4 text-ink-2">Nothing here.</p>
       ) : (
-        <ul className="mt-2 divide-y divide-line rounded-lg border border-line bg-surface">{items.map((d) => <Row key={d.id} d={d} />)}</ul>
+        <ul className="mt-3 divide-y divide-line rounded-xl border border-line bg-surface shadow-panel">{items.map((d) => <Row key={d.id} d={d} />)}</ul>
       )}
     </section>
   );
@@ -67,28 +69,26 @@ export default async function DeadlinesPage({ searchParams }: PageProps<"/deadli
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Deadlines</h1>
-        <Link href="/deadlines/new" className={`${primaryButton} !w-auto`}>Add deadline</Link>
-      </div>
-      <p className="mt-2 max-w-[65ch] text-ink-2">
-        Today is {today} in your time zone. <strong>Due soon</strong> means today or within the next {DUE_SOON_DAYS} days; a deadline dated today is shown as <strong>Due today</strong>, not overdue. Application deadlines are the same dates you set on each programme. Nothing here changes a date for you.
-      </p>
+      <PageHeader
+        title="Deadlines"
+        lede={<>Today is {today} in your time zone. <strong>Due soon</strong> means today or within the next {DUE_SOON_DAYS} days; a deadline dated today is shown as <strong>Due today</strong>, not overdue. Application deadlines are the same dates you set on each programme. Nothing here changes a date for you.</>}
+        actions={<Link href="/deadlines/new" className={`${primaryButton} !w-auto`}>Add deadline</Link>}
+      />
       {notice && <div className="mt-4"><Alert tone={notice.tone}>{notice.text}</Alert></div>}
 
       {deadlines.length === 0 ? (
-        <section aria-labelledby="empty-h" className="mt-6 rounded-lg border border-line bg-surface p-6">
-          <h2 id="empty-h" className="text-lg font-semibold">No deadlines yet</h2>
+        <section aria-labelledby="empty-h" className="mt-8 rounded-xl border border-line bg-surface p-6 shadow-panel sm:p-8">
+          <h2 id="empty-h" className="text-2xl">No deadlines yet</h2>
           <p className="mt-2 max-w-[65ch] text-ink-2">Set an application deadline on a programme, or add a preparation milestone here.</p>
           <div className="mt-4"><Link href="/deadlines/new" className={`${primaryButton} !w-auto`}>Add a deadline</Link></div>
         </section>
       ) : (
-        <div className="mt-6 space-y-8">
-          <Group id="overdue-h" title="Overdue" items={groups.overdue} />
+        <div className="mt-8 space-y-10">
+          <Group id="overdue-h" title="Overdue" icon="alert" items={groups.overdue} />
           <Group id="soon-h" title="Due soon" hint={`Today through ${DUE_SOON_DAYS} days from today.`} items={groups.soon} />
           <Group id="later-h" title="Later" items={groups.later} />
           {groups.closed.length > 0 && (
-            <details className="rounded-lg border border-line bg-surface">
+            <details className="rounded-xl border border-line bg-surface shadow-panel">
               <summary className="flex min-h-11 cursor-pointer items-center px-4 font-semibold">Done or no longer needed ({groups.closed.length})</summary>
               <ul className="divide-y divide-line border-t border-line">{groups.closed.map((d) => <Row key={d.id} d={d} />)}</ul>
             </details>

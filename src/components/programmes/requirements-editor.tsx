@@ -13,7 +13,7 @@ const dangerButton =
 function Row({ r }: { r: Requirement }) {
   const isRefs = r.requirement_type === "references";
   return (
-    <li className="rounded-lg border border-line bg-surface p-4">
+    <li className="p-4">
       <ActionForm
         action={updateRequirementAction}
         submitLabel="Save"
@@ -64,7 +64,7 @@ export function RequirementsEditor({ programmeId, requirements }: { programmeId:
       {requirements.length === 0 ? (
         <p className="rounded-lg border border-dashed border-control p-4 text-ink-2">No requirements recorded yet. Add the first one below.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="divide-y divide-line rounded-xl border border-line bg-surface shadow-panel">
           {requirements.map((r) => (
             <Row key={r.id} r={r} />
           ))}
@@ -72,8 +72,8 @@ export function RequirementsEditor({ programmeId, requirements }: { programmeId:
       )}
 
       {addable.length > 0 && (
-        <section aria-labelledby="add-req" className="rounded-lg border border-line bg-info-tint p-4">
-          <h3 id="add-req" className="font-semibold">Add a requirement</h3>
+        <section aria-labelledby="add-req" className="rounded-xl border border-line bg-info-tint p-4 sm:p-5">
+          <h3 id="add-req" className="font-display text-lg font-semibold">Add a requirement</h3>
           <ActionForm action={addRequirementAction} submitLabel="Add requirement" pendingLabel="Adding…" className="mt-3 space-y-3">
             {(state) => {
               const echoed = state.status === "error" ? state.values : undefined;

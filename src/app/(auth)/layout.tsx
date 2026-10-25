@@ -12,7 +12,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
       <aside className="on-dark hidden bg-rail px-12 py-10 text-rail-ink lg:flex lg:flex-col lg:justify-between">
         <Brand onDark />
         <div className="max-w-md">
-          <p className="text-3xl font-semibold leading-tight tracking-tight">
+          <p className="font-display text-4xl font-semibold leading-tight">
             Compare your master&apos;s applications and see what to do next in one workspace.
           </p>
           <p className="mt-4 text-base text-rail-muted">

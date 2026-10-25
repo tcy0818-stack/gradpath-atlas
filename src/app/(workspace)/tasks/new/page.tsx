@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
 import { TaskForm } from "@/components/planning/task-form";
 import { textLink } from "@/components/ui";
 import { createTaskAction } from "@/lib/planning/actions";
@@ -13,9 +14,8 @@ export default async function NewTaskPage({ searchParams }: PageProps<"/tasks/ne
   const [programmes, tasks] = await Promise.all([listProgrammeRefs(), listTasks()]);
   return (
     <>
-      <p className="text-sm"><Link href="/tasks" className={textLink}>Back to tasks</Link></p>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight">Add a task</h1>
-      <div className="mt-6 max-w-3xl">
+      <PageHeader back={<Link href="/tasks" className={textLink}>Back to tasks</Link>} title="Add a task" />
+      <div className="mt-8 max-w-3xl rounded-xl border border-line bg-surface p-5 shadow-panel sm:p-6">
         <TaskForm mode="create" action={createTaskAction} programmes={programmes} candidates={tasks} defaults={{ programme_id: programmes.some((p) => p.id === programme) ? programme : null }} />
       </div>
     </>

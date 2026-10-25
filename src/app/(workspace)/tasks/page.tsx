@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DueLabel, Pill } from "@/components/planning/due-label";
+import { PageHeader } from "@/components/page-header";
 import { Alert, primaryButton, quietButton, standaloneLink, textLink } from "@/components/ui";
 import { setTaskStatusAction } from "@/lib/planning/actions";
 import { listProgrammeRefs, listTasks, todayForUser } from "@/lib/planning/queries";
@@ -29,24 +30,22 @@ export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
-        <Link href="/tasks/new" className={`${primaryButton} !w-auto`}>Add task</Link>
-      </div>
-      <p className="mt-2 max-w-[65ch] text-ink-2">
-        Dates are calendar dates in your time zone ({today} today). A task that needs another task first is <strong>Blocked</strong> until that task is done. Task progress is separate from document readiness and from application status.
-      </p>
+      <PageHeader
+        title="Tasks"
+        lede={<>Dates are calendar dates in your time zone ({today} today). A task that needs another task first is <strong>Blocked</strong> until that task is done. Task progress is separate from document readiness and from application status.</>}
+        actions={<Link href="/tasks/new" className={`${primaryButton} !w-auto`}>Add task</Link>}
+      />
       {notice && <div className="mt-4"><Alert tone={notice.tone}>{notice.text}</Alert></div>}
 
       {all.length === 0 ? (
-        <section aria-labelledby="empty-h" className="mt-6 rounded-lg border border-line bg-surface p-6">
-          <h2 id="empty-h" className="text-lg font-semibold">No tasks yet</h2>
+        <section aria-labelledby="empty-h" className="mt-8 rounded-xl border border-line bg-surface p-6 shadow-panel sm:p-8">
+          <h2 id="empty-h" className="text-2xl">No tasks yet</h2>
           <p className="mt-2 max-w-[65ch] text-ink-2">Add the steps you need to take, such as requesting references or booking a language test. Tie a task to a programme, or leave it general. Loading fictional examples on the Programmes page also adds sample tasks.</p>
           <div className="mt-4"><Link href="/tasks/new" className={`${primaryButton} !w-auto`}>Add your first task</Link></div>
         </section>
       ) : (
-        <div className="mt-6 space-y-4">
-          <form method="get" role="search" aria-label="Filter and sort tasks" className="rounded-lg border border-line bg-surface p-4">
+        <div className="mt-8 space-y-4">
+          <form method="get" role="search" aria-label="Filter and sort tasks" className="rounded-xl border border-line bg-surface p-4 shadow-panel sm:p-5">
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <label htmlFor="programme" className="block text-sm font-semibold">Programme</label>
@@ -86,10 +85,10 @@ export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
               <p className="mt-1 text-ink-2">Try different filters, or <Link href="/tasks" className={textLink}>clear them</Link>.</p>
             </div>
           ) : (
-            <div role="region" aria-label="Tasks" tabIndex={0} className="overflow-x-auto rounded-lg border border-line bg-surface">
+            <div role="region" aria-label="Tasks" tabIndex={0} className="relative overflow-x-auto rounded-xl border border-line bg-surface shadow-panel">
               <table className="w-full min-w-[48rem] border-collapse text-left text-sm">
                 <caption className="sr-only">Your tasks</caption>
-                <thead className="border-b border-line bg-bg">
+                <thead className="border-b border-line bg-info-tint">
                   <tr>
                     <th scope="col" className="px-3 py-2 font-semibold">Task</th>
                     <th scope="col" className="px-3 py-2 font-semibold">Due</th>
@@ -100,7 +99,7 @@ export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
                 </thead>
                 <tbody>
                   {rows.map((t) => (
-                    <tr key={t.id} className="border-b border-line last:border-0">
+                    <tr key={t.id} className="border-b border-line last:border-0 hover:bg-bg">
                       <td className="px-3 py-1">
                         <Link href={`/tasks/${t.id}`} className={`${standaloneLink} !font-semibold`}>{t.title}</Link>
                         <div className="text-ink-2">{t.programme_id ? (programmeName.get(t.programme_id) ?? "Programme") : "General"}</div>

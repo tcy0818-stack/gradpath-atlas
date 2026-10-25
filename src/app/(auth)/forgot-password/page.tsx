@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Reset your password" };
 export default function ForgotPasswordPage() {
   return (
     <>
-      <h1 className="mb-2 text-2xl font-semibold tracking-tight">Reset your password</h1>
+      <h1 className="mb-2 text-3xl">Reset your password</h1>
       <p className="mb-6 text-sm text-ink-2">Enter your account email and we&apos;ll send you a link to choose a new password.</p>
       <Suspense fallback={null}>
         <div className="mb-5 empty:hidden">

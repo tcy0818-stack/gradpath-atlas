@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/icons";
 import { quietButton, standaloneLink, textLink } from "@/components/ui";
 import { formatIsoDate } from "@/lib/dates";
 import { tuitionLabel } from "@/lib/programmes/compare";
@@ -13,11 +14,14 @@ const label = "block text-sm font-semibold";
 function FilterForm({ params, countries, subjects }: { params: ListParams; countries: string[]; subjects: string[] }) {
   const active = params.q || params.status || params.country || params.subject || params.shortlisted || params.sort !== "deadline";
   return (
-    <form method="get" role="search" aria-label="Search and filter programmes" className="rounded-lg border border-line bg-surface p-4">
+    <form method="get" role="search" aria-label="Search and filter programmes" className="rounded-xl border border-line bg-surface p-4 shadow-panel sm:p-5">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="lg:col-span-3">
           <label htmlFor="q" className={label}>Search</label>
-          <input id="q" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="University, programme, country or subject" className={selectClass} />
+          <div className="relative">
+            <Icon name="search" size={18} className="pointer-events-none absolute left-3 top-1/2 mt-0.5 -translate-y-1/2 text-muted" />
+            <input id="q" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="University, programme, country or subject" className={`${selectClass} !pl-10`} />
+          </div>
         </div>
         <div>
           <label htmlFor="status" className={label}>Status</label>
@@ -82,10 +86,10 @@ export function ProgrammeList({ rows, total, params, countries, subjects }: { ro
             <button type="submit" className={quietButton}>Compare selected</button>
             <span className="text-sm text-muted">Tick 2 to 6 programmes. With none ticked, your shortlist is compared.</span>
           </form>
-          <div role="region" aria-label="Programmes" tabIndex={0} className="overflow-x-auto rounded-lg border border-line bg-surface">
+          <div role="region" aria-label="Programmes" tabIndex={0} className="relative overflow-x-auto rounded-xl border border-line bg-surface shadow-panel">
             <table className="w-full min-w-[46rem] border-collapse text-left text-sm">
               <caption className="sr-only">Your programmes</caption>
-              <thead className="border-b border-line bg-bg">
+              <thead className="border-b border-line bg-info-tint">
                 <tr>
                   <th scope="col" className="w-12 px-3 py-2"><span className="sr-only">Select to compare</span></th>
                   <th scope="col" className="px-3 py-2 font-semibold">Programme</th>
@@ -98,7 +102,7 @@ export function ProgrammeList({ rows, total, params, countries, subjects }: { ro
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-line last:border-0">
+                  <tr key={r.id} className="border-b border-line last:border-0 hover:bg-bg">
                     <td className="px-3 py-1">
                       <input type="checkbox" form="compare-form" name="ids" value={r.id} aria-label={`Compare ${r.university_name}, ${r.programme_name}`} className="size-5 accent-[var(--accent)]" />
                     </td>
@@ -116,7 +120,7 @@ export function ProgrammeList({ rows, total, params, countries, subjects }: { ro
                         <input type="hidden" name="id" value={r.id} />
                         <input type="hidden" name="value" value={r.is_shortlisted ? "0" : "1"} />
                         <button type="submit" aria-pressed={r.is_shortlisted} aria-label={`${r.is_shortlisted ? "Remove from shortlist" : "Shortlist"}: ${r.programme_name}`} className={`${quietButton} ${r.is_shortlisted ? "!border-accent !bg-accent-tint" : ""}`}>
-                          {r.is_shortlisted ? "Shortlisted" : "Shortlist"}
+                          <Icon name="star" size={16} filled={r.is_shortlisted} className="mr-1.5" />{r.is_shortlisted ? "Shortlisted" : "Shortlist"}
                         </button>
                       </form>
                     </td>

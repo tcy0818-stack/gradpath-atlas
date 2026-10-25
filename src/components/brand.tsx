@@ -10,7 +10,7 @@ export function Brand({ onDark = false, href = "/" }: { onDark?: boolean; href?:
         <rect x="6" y="13" width="11" height="3" rx="1.5" fill="#e2e8f0" />
         <rect x="6" y="18" width="14" height="3" rx="1.5" fill="#e2e8f0" />
       </svg>
-      <span className={onDark ? "text-rail-ink" : "text-ink"}>GradPath Atlas</span>
+      <span className={`font-display text-lg ${onDark ? "text-rail-ink" : "text-ink"}`}>GradPath Atlas</span>
     </Link>
   );
 }

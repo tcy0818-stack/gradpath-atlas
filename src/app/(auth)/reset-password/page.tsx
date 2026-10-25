@@ -26,7 +26,7 @@ async function ResetForm() {
 export default function ResetPasswordPage() {
   return (
     <>
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Choose a new password</h1>
+      <h1 className="mb-6 text-3xl">Choose a new password</h1>
       <Suspense fallback={<p role="status" className="text-sm text-muted">Checking your reset link…</p>}>
         <ResetForm />
       </Suspense>
