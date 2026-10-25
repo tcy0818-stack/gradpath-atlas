@@ -7,16 +7,17 @@ const panel = "rounded-lg border border-line bg-surface p-4";
 
 /**
  * An illustrative preview, not a screenshot: the app's own comparison table and calculations run on invented example
- * data. It is inert (nothing inside can be focused or clicked) and described once in the figure label.
+ * data. Nothing in it links anywhere. The table region still scrolls sideways (touch and keyboard); `inert` would block that.
  */
 export function LandingPreview() {
   const actions = exampleWorkspace.nextActions.slice(0, 3);
   return (
     <figure aria-label="Illustrative preview of the planner using invented example data: two programmes compared side by side, the next actions in order, and one transcript reused for both programmes." className="m-0">
-      <div inert className="space-y-4 rounded-xl border border-line bg-bg p-3 sm:p-4">
+      <div className="space-y-4 rounded-xl border border-line bg-bg p-3 sm:p-4">
         <div>
           <p className="mb-2 text-sm font-semibold">Compare programmes side by side</p>
-          <CompareMatrix columns={exampleColumns} rows={exampleRows} />
+          <p className="mb-2 text-sm text-muted md:hidden">Swipe the table sideways to compare →</p>
+          <CompareMatrix columns={exampleColumns} rows={exampleRows} linkNames={false} />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className={panel}>

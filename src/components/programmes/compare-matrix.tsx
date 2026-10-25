@@ -18,13 +18,13 @@ function CellView({ c }: { c: Cell }) {
  * Programmes as columns, attributes and requirements as rows. The first column stays visible while the table scrolls
  * sideways inside its own region, so the page itself never scrolls horizontally (CMP-04).
  */
-export function CompareMatrix({ columns, rows }: { columns: Column[]; rows: MatrixRow[] }) {
+export function CompareMatrix({ columns, rows, linkNames = true }: { columns: Column[]; rows: MatrixRow[]; /** False for the landing-page preview, whose invented programmes have no pages to open. */ linkNames?: boolean }) {
   const groups: { title: string; rows: MatrixRow[] }[] = [
     { title: "Overview", rows: rows.filter((r) => r.group === "overview") },
     { title: "Requirements", rows: rows.filter((r) => r.group === "requirements") },
   ];
   return (
-    <div role="region" aria-label="Programme comparison, scrolls sideways on small screens" tabIndex={0} className="overflow-x-auto rounded-lg border border-line bg-surface">
+    <div role="region" aria-label="Programme comparison, scrolls sideways on small screens" tabIndex={0} className="overflow-x-auto overscroll-x-contain rounded-lg border border-line bg-surface">
       <table className="w-full border-collapse text-left text-sm" style={{ minWidth: `${12 + columns.length * 13}rem` }}>
         <caption className="sr-only">Side-by-side comparison of {columns.length} programmes</caption>
         <thead>
@@ -34,7 +34,11 @@ export function CompareMatrix({ columns, rows }: { columns: Column[]; rows: Matr
             </th>
             {columns.map(({ programme: p }) => (
               <th key={p.id} scope="col" className="min-w-[12rem] bg-bg px-3 py-3 align-top font-semibold">
-                <Link href={`/programmes/${p.id}`} className="inline-flex min-h-11 items-center text-accent underline underline-offset-4 hover:text-accent-strong">{p.programme_name}</Link>
+                {linkNames ? (
+                  <Link href={`/programmes/${p.id}`} className="inline-flex min-h-11 items-center text-accent underline underline-offset-4 hover:text-accent-strong">{p.programme_name}</Link>
+                ) : (
+                  <span className="inline-flex min-h-11 items-center">{p.programme_name}</span>
+                )}
                 <div className="font-normal text-ink-2">{p.university_name}</div>
                 {p.sample_key && <div className="mt-1 font-normal"><ExampleBadge /></div>}
               </th>
