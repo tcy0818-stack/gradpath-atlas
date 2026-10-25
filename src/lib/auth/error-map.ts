@@ -14,8 +14,8 @@ export const MESSAGES = {
   samePassword: "Choose a password different from your current one.",
   generic: "Something went wrong on our side. Please try again.",
   // Shown whether or not the address already has an account.
-  signUpCheckEmail: "Check your email. If this address can be used for a new account, a confirmation link is on its way.",
-  resetCheckEmail: "If an account exists for that email, a reset link is on its way. It can take a few minutes.",
+  signUpCheckEmail: "Check your email. If this address can be used for a new account, a confirmation link is on its way. Check your spam or junk folder if the email doesn't arrive.",
+  resetCheckEmail: "If an account exists for that email, a reset link is on its way. It can take a few minutes. Check your spam or junk folder if the email doesn't arrive.",
 } as const;
 
 const rateLimit = (e: NonNullable<AuthErrorLike>) =>
