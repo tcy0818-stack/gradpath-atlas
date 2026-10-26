@@ -1,6 +1,6 @@
 # GradPath Atlas — testing
 
-Setup and deployment: [README.md](README.md). Requirement IDs: [PRD.md](PRD.md). Per-task gates and evidence: [tasklist.md](tasklist.md), which holds the **canonical manual checklists** (Phase 6 and Phase 7 sections). This file does not repeat them.
+Setup and deployment: [README.md](README.md). Requirement IDs: [PRD.md](PRD.md). Per-task gates and evidence: [tasklist.md](tasklist.md), with the **canonical manual checklists** (Phase 6 and Phase 7) and full evidence in [docs/tasklist-evidence-log.md](docs/tasklist-evidence-log.md). This file does not repeat them.
 
 ## Evidence categories
 
