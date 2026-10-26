@@ -13,6 +13,8 @@ Setup and deployment: [README.md](README.md). Requirement IDs: [PRD.md](PRD.md).
 
 ## Final review (2026-10-25, Node 22.23.4, npm 10.9.9)
 
+> The production checks below were observed at the site's earlier address, `mktg4150-asm1.vercel.app`. The live site is now https://gradpath-atlas-26.vercel.app; its signed-out behaviour, redirects and email links have **not** been re-checked by the agent at the new address.
+
 | Check | Result |
 | --- | --- |
 | `npm run lint` · `typecheck` · `test` · `build` | All exit 0; **18 files, 193 tests passed**; build compiled. Browser bundle: no secret-key name or `service_role`; no value-shaped keys in `.next` |
@@ -52,15 +54,17 @@ On the live site, signed in with a test account:
 6. Download the CSV and JSON from **Settings** and open the CSV in a spreadsheet; a programme named `=1+1` must appear as text.
 7. Sign out; the private pages and downloads must now send you to sign-in.
 
-## Not verified (remaining)
+## Remaining checks: student-reported complete (2026-10-26)
 
-- **Sign-up confirmation and password-reset emails** (`M3.03`, `M3.04`, `M3.07`, `M3.08`, `M3.12`). The test accounts were created and auto-confirmed manually, so they are **not** evidence that sign-up or email confirmation works. Supabase's built-in sender only reaches project-team addresses at about 2 per hour, so outside users cannot be assumed to receive mail. **Outstanding release configuration:** custom SMTP (or another deliberate arrangement) must be set up before outside users can sign up or reset passwords. See README "Email and sign-up".
-- Login failure text identical for unknown email vs wrong password (`M3.05`); sign-out followed by Back button (`M3.06`); time-zone sync on first sign-in (`M3.10`).
-- **The live deployment** (`M6.16`): deployed at https://mktg4150-asm1.vercel.app; signed-out behaviour was agent-observed (above), and the student reported the deployment setup passed. A signed-in smoke test on production (sample load, export) has not been recorded with results, and sign-up for outside users depends on custom SMTP.
-- Re-run on the final schema of `rls_coverage.sql`, `hosted_authz_check.sql` and `npm run check:api-isolation` (`M6.11`): migrations are unchanged since the student-reported runs, but the agent did not run them (it does not sign in to the hosted project), and the isolation script gained one check (another user cannot change a profile's simulated plan).
-- Print preview of the **Compare** page (`M4.07`); the adviser print preview was reported fine.
-- Automated accessibility scanning of rendered pages (no Chrome was available to the detector); no claim of WCAG conformance is made.
-- Real-data loading, error and offline states were not forced (no safe way to do so without damaging data).
+The student reported that all checks previously listed as unverified are now done on the live site, and that the project is submission-ready. No per-check output was supplied and the agent has not signed in or tested email delivery, so these are **student-reported, not agent-verified**:
+
+- Sign-up confirmation and password-reset emails (`M3.03`, `M3.04`, `M3.07`, `M3.08`, `M3.12`), including delivery for addresses outside the Supabase project team.
+- Identical login-failure text, sign-out then Back, first sign-in time-zone sync (`M3.05`, `M3.06`, `M3.10`).
+- Live smoke test at https://gradpath-atlas-26.vercel.app (`M6.16`): signed-out access from another device, then a signed-in workflow and export.
+- Final-schema re-run of `rls_coverage.sql`, `hosted_authz_check.sql` and `npm run check:api-isolation` (`M6.11`).
+- Print preview of Compare (`M4.07`); redesigned pages on real devices (`R2.05`, `R3.04`).
+
+Still **not** established by anyone: automated page-level accessibility scanning (no Chrome was available to the detector), so no WCAG conformance is claimed; and real-data loading, error and offline states were not forced.
 
 ## Later improvements (not built)
 

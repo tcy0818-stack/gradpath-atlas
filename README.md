@@ -4,7 +4,7 @@ A master's-application planning workspace (MKTG 4150 NPM, Assignment 1, hypothet
 
 Specification: [PRD.md](PRD.md). Build plan and evidence: [tasklist.md](tasklist.md). Test checklist and what is verified: [TESTING.md](TESTING.md).
 
-**Status:** Phases 0–8 are built and deployed at <https://mktg4150-asm1.vercel.app>. Local checks pass and the signed-out production checks were observed (see TESTING.md). **Not yet done:** email delivery for outside users (custom SMTP), the remaining checks in TESTING.md, and the submission steps below.
+**Status:** Phases 0–8 and the redesign are built and deployed at <https://gradpath-atlas-26.vercel.app>. Local checks pass (agent-run). The student reports every remaining manual check done and the project ready to submit (see TESTING.md for which results are agent-run and which are student-reported). Only the submission steps below remain.
 
 ## Stack
 
@@ -55,7 +55,7 @@ Check that `0010` is applied: run `select proname from pg_proc where proname = '
 
 ## Email and sign-up (important before going public)
 
-Supabase's **built-in email sender** only delivers to addresses of your project's organisation team, at about **2 emails per hour**, with no delivery guarantee ([Supabase docs](https://supabase.com/docs/guides/auth/auth-smtp), checked 2026-10-25). So on the live site, sign-up confirmation and password-reset emails **will not reach a marker or other outsider**. **Custom SMTP is outstanding configuration, not an optional extra:** without it, outside users cannot receive sign-up or reset emails. Set it up before going public; the alternatives below are fallbacks.
+Supabase's **built-in email sender** only delivers to addresses of your project's organisation team, at about **2 emails per hour**, with no delivery guarantee ([Supabase docs](https://supabase.com/docs/guides/auth/auth-smtp), checked 2026-10-25). So on the live site, sign-up confirmation and password-reset emails **will not reach a marker or other outsider**. **Custom SMTP is required for outside users, not an optional extra:** without it, they cannot receive sign-up or reset emails. The student reports the email checks done; which option was used (custom SMTP, a private demo account, or another arrangement) is for the student to state in the submission. The alternatives below are fallbacks.
 
 1. **Custom SMTP** (enable it on the dashboard's Authentication settings page). Supabase lists Resend, AWS SES, Postmark, SendGrid, ZeptoMail and Brevo as examples; use a free tier you already control. After saving, mail goes to all addresses (starting limit 30 per hour).
 2. **Hand over a pre-confirmed demo account** privately (see Submission) and leave sign-up as is. Marker sign-up will not work, and the page should not claim otherwise.
@@ -63,7 +63,7 @@ Supabase's **built-in email sender** only delivers to addresses of your project'
 
 **Redirect and template settings** (dashboard Authentication section: URL Configuration and Email Templates):
 
-- **Site URL** = `https://mktg4150-asm1.vercel.app` (no trailing slash: the email templates below append `/auth/callback` to it).
+- **Site URL** = `https://gradpath-atlas-26.vercel.app` (no trailing slash: the email templates below append `/auth/callback` to it). If the address changes, update `NEXT_PUBLIC_SITE_URL` in Vercel and redeploy, and update Supabase's Site URL and Redirect URLs to match.
 - **Redirect URLs:** add `http://localhost:3000/**` and the production URL with `/**` ([docs](https://supabase.com/docs/guides/auth/redirect-urls)). Vercel preview URLs need a separate pattern if you use them.
 - The app's `/auth/callback` accepts both `?code=` (same browser only) and `?token_hash=&type=` links. For links that work on any device, edit the **Confirm signup** template to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email` and the **Reset password** template to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery`.
 
